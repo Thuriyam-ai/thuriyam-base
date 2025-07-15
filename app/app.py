@@ -37,8 +37,10 @@ app.add_middleware(
 
 # Include API routes
 from todos.views import router as todos_router
+from users.views import router as users_router
 
 app.include_router(todos_router, prefix=config.API_PREFIX)
+app.include_router(users_router, prefix=f"{config.API_PREFIX}", tags=["users"])
 
 # Add a simple root health check
 @app.get("/", summary="Health Check", description="Check if the service is running")

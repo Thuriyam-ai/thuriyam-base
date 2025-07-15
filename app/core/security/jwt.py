@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, UTC
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
-from app.core.config import get_settings
+from core.config import get_settings
 
 settings = get_settings()
 

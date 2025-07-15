@@ -17,7 +17,6 @@ httptools==0.6.4
 nest-asyncio==1.6.0
 
 # Data Processing
-pandas==2.1.4
 pymongo==4.6.1
 motor==3.3.2
 
@@ -30,9 +29,6 @@ requests==2.29.0
 # CLI
 typer==0.15.1
 
-# Async Django
-adrf==0.1.8
-
 # Monitoring & Observability
 elastic-apm==6.18.0
 datadog==0.50.2
@@ -41,3 +37,9 @@ datadog==0.50.2
 pytz==2024.1
 python-decouple==3.8
 base58==2.1.1
+
+# Security & Authentication
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+python-multipart==0.0.6
+email-validator==2.1.0

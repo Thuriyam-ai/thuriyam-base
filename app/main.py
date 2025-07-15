@@ -16,7 +16,14 @@ COMMAND_MODULE_PATHS = [
 @app.command()
 def runserver(host: str = "127.0.0.1", port: int = 8000, reload: bool = True):
     """Run the FastAPI server."""
-    uvicorn.run("app:app", host=host, port=port, reload=reload)
+    
+    uvicorn.run(
+        "app:app", 
+        host=host, 
+        port=port, 
+        reload=reload,
+        reload_excludes=[".venv/*"]
+    )
 
 
 @app.command()
