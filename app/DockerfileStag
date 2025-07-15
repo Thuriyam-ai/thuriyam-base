@@ -1,0 +1,29 @@
+FROM ubuntu:18.04
+MAINTAINER Moiz Arsiwala <moiz.arsiwala@workindia.in>
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONIOENCODING UTF-8
+ENV LANGUAGE en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LC_TYPE en_US.UTF-8
+ENV PIP_EXTRA_INDEX_URL http://admin:admin@pypi.workindia.in:8081/simple/
+
+RUN mkdir /config
+RUN mkdir /libs
+
+RUN apt-get update
+RUN apt-get install -y python3.6
+RUN apt-get install -y python3-pip
+RUN apt-get install -y libpq-dev xz-utils libxext-dev libssl-dev libxrender1 zip unzip xvfb wget libfontconfig1
+RUN apt-get install -y build-essential python3-dev python3-cffi libcairo2 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libffi-dev shared-mime-info
+
+RUN pip3 install --upgrade pip
+
+RUN mkdir -p /config
+ADD requirements/base.txt /config/base.txt
+ADD requirements/staging.txt /config/requirements.txt
+RUN pip3 install -r /config/requirements.txt --trusted-host pypi.workindia.in
+
+RUN mkdir -p /src;
+WORKDIR /src
+COPY . ./

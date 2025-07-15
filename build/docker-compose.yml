@@ -1,0 +1,98 @@
+services:
+  workindia-jobs-ms:
+    platform: linux/amd64
+    build:
+      context: ../app
+      dockerfile: DockerfileLocal
+    container_name: workindia-jobs-ms
+    restart: always
+    ports:
+      - "8000:8000" # FastAPI service will be running on port 8000
+      - "5678:5678" # Debugpy will be listening for connections, allowing the VSCode debugger to add breakpoints during execution.
+    command: bash -c "python3 main.py runserver --host 0.0.0.0 --port 8000"
+    environment:
+      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - STATSD_HOST=statsd
+      - STATSD_PORT=9125
+      - MONGO_DATABASE_HOST=mongo
+      - MONGO_DATABASE_PORT=27017
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - ES_HOST=elasticsearch
+      - ES_PORT=9200
+      - ES8_HOST=elasticsearch8
+      - ES8_PORT=9200
+
+  kafka_zookeeper:
+    platform: linux/amd64
+    image: "bitnami/zookeeper:3.9"
+    restart: always
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/bitnami
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    platform: linux/amd64
+    image: "bitnami/kafka:3.4"
+    restart: always
+    ports:
+      - "9092:9092"
+    volumes:
+      - "kafka_data:/bitnami"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=kafka_zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+    depends_on:
+      - kafka_zookeeper
+
+  statsd:
+    platform: linux/amd64
+    image: prom/statsd-exporter
+    restart: always
+    container_name: statsd
+    ports:
+      - "9102:9102/tcp"
+      - "9125:9125/tcp"
+      - "9125:9125/udp"
+    expose:
+      - 9125
+      - 9102
+
+  mongo:
+    platform: linux/amd64
+    image: "mongo:latest"
+    restart: always
+    environment:
+      - MONGODB_ROOT_PASSWORD=admin
+      - MONGODB_USERNAME=workindia
+      - MONGODB_PASSWORD=workindia
+
+  redis:
+    image: "bitnami/redis"
+    environment:
+      - "REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL"
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis_data:/var/lib/redis/data"
+    restart: always
+    logging:
+      driver: json-file
+      options:
+        max-size: "100m"
+        max-file: "3"
+
+volumes:
+  zookeeper_data: {}
+  kafka_data: {}
+  redis_data: {}
+  mongodb_data: {}

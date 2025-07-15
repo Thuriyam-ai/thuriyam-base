@@ -1,0 +1,90 @@
+## Application Name is a required field
+##
+applicationName: wi-job-notification-ms-beta
+
+## Owner of the Microservice
+##
+owner: "Abhinav Srivastava"
+ownerEmail: "abhinav.srivastava@workindia.in"
+
+## Docker Image
+##
+image:
+  repository: application/wi-job-notification-ms
+  tag: nil
+
+## List of Deployments and its properties
+## for api, kafka consumers, celery workers, etc.
+##
+deployments:
+  - name: "api"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - uvicorn app:app --host 0.0.0.0 --port 5000 --workers 2 --log-level info --loop uvloop --http httptools --limit-concurrency 1000 --timeout-keep-alive 10
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    service:
+      port: 5000
+    resources:
+      limits:
+        cpu: 1
+        memory: 500Mi
+      requests:
+        cpu: 200m
+        memory: 150Mi
+
+    ingress:
+      hosts:
+        - host: api-beta.workindia.in
+          enableTokenValidation: true
+          paths:
+            - /api/job-notification/
+        - host: internal-api-beta.candidate.workindia.local
+          paths:
+            - /api/job-notification/
+
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: web
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: web
+
+  - name: "api-canary"
+    replicas: 0
+    args:
+      - bash
+      - -c
+      - uvicorn app:app --host 0.0.0.0 --port 5000 --workers 2 --log-level info --loop uvloop --http httptools --limit-concurrency 1000 --timeout-keep-alive 10
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    service:
+      port: 5000
+    resources:
+      limits:
+        cpu: 1
+        memory: 500Mi
+      requests:
+        cpu: 150m
+        memory: 200Mi
+
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: job-notification
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: job-notification
+
+statsd:
+  udpPort: 9125
+  mappingConfig: "mappings:\n  - match: (.*)\\.gunicorn\\.request\\.status\\.(.*)\n    match_type: regex\n    help: \"http response code\"\n    name: \"http_response_code\"\n    labels:\n      status: \"$2\"\n      application: \"$1\""

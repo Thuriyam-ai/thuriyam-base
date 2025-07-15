@@ -1,0 +1,5 @@
+[console_scripts]
+flake8-async = flake8_async:main
+
+[flake8.extension]
+ASY = flake8_async:Plugin

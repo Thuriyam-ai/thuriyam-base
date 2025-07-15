@@ -1,0 +1,4 @@
+-r base.txt
+# Add your development dependencies
+pre-commit==2.9.2
+flake8-async==24.11.4

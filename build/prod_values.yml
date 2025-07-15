@@ -1,0 +1,391 @@
+## Application Name is a required field
+##
+applicationName: wi-job-notification-ms
+
+## Owner of the Microservice
+##
+owner: "Abhinav Srivastava"
+ownerEmail: "abhinav.srivastava@workindia.in"
+
+## Docker Image
+##
+image:
+  repository: application/wi-job-notification-ms
+  tag: nil
+
+## List of Deployments and its properties
+## for api, kafka consumers, celery workers, etc.
+##
+deployments:
+  - name: "api"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - uvicorn app:app --host 0.0.0.0 --port 5000 --workers 2 --log-level info --loop uvloop --http httptools --limit-concurrency 1000 --timeout-keep-alive 10
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    prometheus:
+      path: /api/job-notification/metrics
+      port: 5000
+    service:
+      port: 5000
+    resources:
+      limits:
+        cpu: 200m
+        memory: 300Mi
+      requests:
+        cpu: 150m
+        memory: 200Mi
+
+    ingress:
+      hosts:
+        - host: internal-api.workindia.in
+          enableTokenValidation: true
+          paths:
+            - /api/job-notification/
+
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: web
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: web
+    
+    readinessProbe:
+      httpGet:
+        path: /api/job-notification/health/
+        port: 5000
+      initialDelaySeconds: 30
+      successThreshold: 5
+      failureThreshold: 10
+      periodSeconds: 5
+    livenessProbe:
+      httpGet:
+        path: /api/job-notification/health/
+        port: 5000
+      initialDelaySeconds: 30
+      failureThreshold: 2
+      timeoutSeconds: 3
+      periodSeconds: 10
+
+  - name: "api-internal"
+    replicas: 0
+    args:
+      - bash
+      - -c
+      - uvicorn app:app --host 0.0.0.0 --port 5000 --workers 2 --log-level info --loop uvloop --http httptools --limit-concurrency 1000 --timeout-keep-alive 10
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    prometheus:
+      path: /api/job-notification/metrics
+      port: 5000
+    service:
+      port: 5000
+    scheduleActions: |
+      [
+        { "schedule": "0 3 * * *", "replicas": "50" },
+        { "schedule": "0 14 * * *", "replicas": "0" }
+      ]
+    resources:
+      limits:
+        cpu: 1
+        memory: 500Mi
+      requests:
+        cpu: 150m
+        memory: 200Mi
+
+    ingress:
+      hosts:
+        - host: internal-api.candidate.workindia.local
+          paths:
+            - /api/job-notification/
+
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: job-notification
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: job-notification
+
+  - name: "jobs-mongo-sync-consumer"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command jobmongosyncconsumer
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 20m
+        memory: 100Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+    
+  - name: "jobs-live-state-update-consumer"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command joblivestatusupdateconsumer
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 10m
+        memory: 90Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+  - name: "pushed-to-candidate-consumer"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command jobnotifpushedtocandidateconsumer
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 90Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+  - name: "insignificant-jobs-consumer"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command sendinsignificantjobforcandidateconsumer
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 20m
+        memory: 80Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+  - name: "candidate-jobs-refresh-consumer"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command candidatejobrefreshconsumer
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 20m
+        memory: 80Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+  - name: "enqueue-job-boosting-consumer"
+    replicas: 10
+    scheduleActions: |
+      [
+        {"schedule": "30 16 * * *", "replicas": "10"},
+        {"schedule": "20 3 * * *", "replicas": "5"}
+      ]
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command enqueuejobboostingconsumer --args max-workers=100
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 1580m
+        memory: 790Mi
+      requests:
+        cpu: 1
+        memory: 512Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+  - name: "fcm-token-update-consumer"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command fcmtokenupdateconsumer
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 50m
+        memory: 90Mi
+      requests:
+        cpu: 20m
+        memory: 60Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+  - name: "jobs-cache-warmup-task-consumer"
+    replicas: 40
+    scheduleActions: |
+      [
+        {"schedule": "20 13 * * *", "replicas": "25"},
+        {"schedule": "50 13 * * *", "replicas": "30"},
+        {"schedule": "20 14 * * *", "replicas": "40"},
+        {"schedule": "30 16 * * *", "replicas": "25"},
+        {"schedule": "00 17 * * *", "replicas": "30"},
+        {"schedule": "30 17 * * *", "replicas": "40"},
+        {"schedule": "30 3 * * *", "replicas": "5"}
+      ]
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command jobscachewarmuptaskconsumer
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 630m
+        memory: 160Mi
+      requests:
+        cpu: 250m
+        memory: 100Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+  - name: "re-job-notification-consumer"
+    replicas: 1
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command recommendationenginejobnotificationcommand
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    resources:
+      limits:
+        cpu: 1
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 100Mi
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: worker
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: worker
+
+cronJobs:
+  - name: "cache-warmup-cron"
+    schedule: "30 16 * * *"
+    args:
+      - bash
+      - -c
+      - python3 main.py run-command cachewarmupcommand --args batch-size=100
+    env:
+      - name: FLAVOUR
+        value: "prod"
+      - name: CONSUL_KEY
+        value: "wi-job-notification-ms/production"
+    tolerations:
+      - key: workindia.in/node-role
+        operator: Equal
+        value: cron-job
+        effect: NoSchedule
+    nodeSelector:
+      workindia.in/node-role: cron-job
+
+statsd:
+  udpPort: 9125
+  mappingConfig: "mappings:\n  - match: (.*)\\.gunicorn\\.request\\.status\\.(.*)\n    match_type: regex\n    help: \"http response code\"\n    name: \"http_response_code\"\n    labels:\n      status: \"$2\"\n      application: \"$1\""

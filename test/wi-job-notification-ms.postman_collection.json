@@ -1,0 +1,50 @@
+{
+	"info": {
+		"_postman_id": "a63f7e74-8934-4645-a980-416cadd1b67c",
+		"name": "wi-job-notification-ms",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "health",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a725933a-8f4f-494c-a975-3943bb2452c1",
+						"exec": [
+							"pm.environment.get(\"url\");",
+
+							"",
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+
+							"pm.test(\"Response time is less than 1000ms\", function () {",
+							"    pm.expect(pm.response.responseTime).to.be.below(1000);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/{{cookiecutter.service_name}}/health",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"job-notification",
+						"health"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}

@@ -1,0 +1,106 @@
+# job-notification API Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-notification
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: job-notification
+  template:
+    metadata:
+      labels:
+        name: job-notification
+    spec:
+      containers:
+        - args:
+            - bash
+            - -c
+            - gunicorn wijobnotificationms.wsgi -b 0.0.0.0:5000 --workers 1 --timeout 300 --log-level debug
+          env:
+            - name: FLAVOUR
+              value: "stag"
+            - name: CONSUL_HOST
+              value: "consul-headless.default"
+            - name: CONSUL_PORT
+              value: "8500"
+            - name: DJANGO_SETTINGS_MODULE
+              value: "wijobnotificationms.settings.staging"
+            - name: CONSUL_KEY
+              value: "wi-job-notification-ms/staging"
+          image: 472738512112.dkr.ecr.us-east-1.amazonaws.com/application/wi-job-notification-ms:staging-__namespace__-__buildnum__
+          imagePullPolicy: Always
+          name: job-notification
+      restartPolicy: Always
+---
+# job-notification Consumer/Celery Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: job-notification-consumer
+spec:
+  selector:
+    matchLabels:
+      name: job-notification-consumer
+  template:
+    metadata:
+      labels:
+        name: job-notification-consumer
+    spec:
+      containers:
+        - args:
+            - bash
+            - -c
+            - python3 manage.py jobscachewarmuptaskconsumer
+          env:
+            - name: FLAVOUR
+              value: "stag"
+            - name: CONSUL_HOST
+              value: "consul-headless.default"
+            - name: CONSUL_PORT
+              value: "8500"
+            - name: DJANGO_SETTINGS_MODULE
+              value: "wijobnotificationms.settings.staging"
+            - name: CONSUL_KEY
+              value: "wi-job-notification-ms/staging"
+          image: 472738512112.dkr.ecr.us-east-1.amazonaws.com/application/wi-job-notification-ms:staging-__namespace__-__buildnum__
+          imagePullPolicy: Always
+          name: job-notification-jobscachewarmup
+          resources: { }
+
+        - args:
+            - bash
+            - -c
+            - python3 manage.py jobmongosyncconsumer
+          env:
+            - name: FLAVOUR
+              value: "stag"
+            - name: CONSUL_HOST
+              value: "consul-headless.default"
+            - name: CONSUL_PORT
+              value: "8500"
+            - name: DJANGO_SETTINGS_MODULE
+              value: "wijobnotificationms.settings.staging"
+            - name: CONSUL_KEY
+              value: "wi-job-notification-ms/staging"
+          image: 472738512112.dkr.ecr.us-east-1.amazonaws.com/application/wi-job-notification-ms:staging-__namespace__-__buildnum__
+          imagePullPolicy: Always
+          name: job-notification-jobmongosync
+          resources: { }
+
+      restartPolicy: Always
+---
+# job-notification Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: job-notification
+spec:
+  type: NodePort
+  ports:
+    - name: "5000"
+      port: 5000
+      targetPort: 5000
+  selector:
+    name: job-notification
