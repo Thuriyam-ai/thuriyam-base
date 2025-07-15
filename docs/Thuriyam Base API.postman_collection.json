@@ -1,0 +1,599 @@
+{
+	"info": {
+		"_postman_id": "d1b58c32-40ae-4a3d-97df-44ff797b263b",
+		"name": "Thuriyam Base API",
+		"description": "A comprehensive collection for the Thuriyam Base FastAPI microservice template with authentication, user management, and todo management endpoints.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36241258"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Check if the service is running"
+					},
+					"response": []
+				}
+			],
+			"description": "Basic health check endpoints"
+		},
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john@example.com\",\n  \"full_name\": \"John Doe\",\n  \"password\": \"securepassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								""
+							]
+						},
+						"description": "Create a new user with username, email, and password"
+					},
+					"response": []
+				},
+				{
+					"name": "Login for Access Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"access_token\", pm.response.json().access_token);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "username",
+									"value": "pmundhra",
+									"description": "Username or email"
+								},
+								{
+									"key": "password",
+									"value": "Pr@m0d#123",
+									"description": "User password"
+								},
+								{
+									"key": "scope",
+									"value": "users",
+									"description": "OAuth2 scope (optional)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/token",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"token"
+							]
+						},
+						"description": "OAuth2 compatible token login, get an access token for future requests"
+					},
+					"response": []
+				}
+			],
+			"description": "User authentication and registration endpoints"
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get Current User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "Bearer token from login"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"me"
+							]
+						},
+						"description": "Get current user information (requires 'me' scope)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "Bearer token with 'users' scope"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/?skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								""
+							],
+							"query": [
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return"
+								}
+							]
+						},
+						"description": "Retrieve users with pagination support (requires 'users' scope)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by Username",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "Bearer token with 'admin' scope"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/johndoe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"johndoe"
+							]
+						},
+						"description": "Get a specific user by username (requires 'admin' scope)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "Bearer token with 'admin' scope"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"john.updated@example.com\",\n  \"full_name\": \"John Updated Doe\",\n  \"password\": \"newsecurepassword123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/johndoe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"johndoe"
+							]
+						},
+						"description": "Update a user by username (requires 'admin' scope)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access_token}}",
+								"description": "Bearer token with 'admin' scope"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/users/johndoe",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"users",
+								"johndoe"
+							]
+						},
+						"description": "Delete a user by username (requires 'admin' scope)"
+					},
+					"response": []
+				}
+			],
+			"description": "User management endpoints (CRUD operations)"
+		},
+		{
+			"name": "Todos",
+			"item": [
+				{
+					"name": "Create Todo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Complete API documentation\",\n  \"description\": \"Create comprehensive API documentation for the project\",\n  \"completed\": false\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/todos/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todos",
+								""
+							]
+						},
+						"description": "Create a new todo item with title, description, and completion status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Todos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/todos/?skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todos",
+								""
+							],
+							"query": [
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return (1-1000)"
+								},
+								{
+									"key": "completed",
+									"value": "",
+									"description": "Filter by completion status (true/false) - leave empty for all",
+									"disabled": true
+								},
+								{
+									"key": "title",
+									"value": "",
+									"description": "Search by title containing this text - leave empty for all",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all todos with optional filtering and pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Todos by Completion Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/todos/?completed=false&skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todos",
+								""
+							],
+							"query": [
+								{
+									"key": "completed",
+									"value": "false",
+									"description": "Filter by completion status"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return"
+								}
+							]
+						},
+						"description": "Get todos filtered by completion status"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Todos by Title",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/todos/?title=API&skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todos",
+								""
+							],
+							"query": [
+								{
+									"key": "title",
+									"value": "API",
+									"description": "Search by title containing this text"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return"
+								}
+							]
+						},
+						"description": "Search todos by title containing specific text"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Todo by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/todos/{{todo_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todos",
+								"{{todo_id}}"
+							]
+						},
+						"description": "Get a specific todo by its ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Todo",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Updated todo title\",\n  \"description\": \"Updated description\",\n  \"completed\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/todos/{{todo_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todos",
+								"{{todo_id}}"
+							]
+						},
+						"description": "Update an existing todo with new data (all fields are optional for partial updates)"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Todo Completion",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/todos/{{todo_id}}/toggle",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todos",
+								"{{todo_id}}",
+								"toggle"
+							]
+						},
+						"description": "Toggle the completed status of a todo (switches from true to false or vice versa)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Todo",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/todos/{{todo_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"todos",
+								"{{todo_id}}"
+							]
+						},
+						"description": "Delete a todo by its ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Todo management endpoints (CRUD operations with filtering and search)"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "access_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "todo_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
