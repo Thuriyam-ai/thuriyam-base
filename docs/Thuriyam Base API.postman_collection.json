@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "cca5c3e3-83b1-4b50-a170-084a821fed57",
+		"_postman_id": "d4f9b38b-1ad1-4ca3-ae1e-b8d270266749",
 		"name": "Thuriyam Base API",
 		"description": "A comprehensive collection for the Thuriyam Base FastAPI microservice template with authentication, user management, and todo management endpoints.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -269,7 +269,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/johndoe",
+							"raw": "{{base_url}}/api/v1/users/{{username}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -277,7 +277,7 @@
 								"api",
 								"v1",
 								"users",
-								"johndoe"
+								"{{username}}"
 							]
 						},
 						"description": "Get a specific user by username (requires 'admin' scope)"
@@ -322,7 +322,7 @@
 							"raw": "{\n  \"email\": \"john.updated@example.com\",\n  \"full_name\": \"John Updated Doe\",\n  \"password\": \"newsecurepassword123\"\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/johndoe",
+							"raw": "{{base_url}}/api/v1/users/{{username}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -330,7 +330,7 @@
 								"api",
 								"v1",
 								"users",
-								"johndoe"
+								"{{username}}"
 							]
 						},
 						"description": "Update a user by username (requires 'admin' scope)"
@@ -366,7 +366,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/v1/users/johndoe",
+							"raw": "{{base_url}}/api/v1/users/{{username}}",
 							"host": [
 								"{{base_url}}"
 							],
@@ -374,7 +374,7 @@
 								"api",
 								"v1",
 								"users",
-								"johndoe"
+								"{{username}}"
 							]
 						},
 						"description": "Delete a user by username (requires 'admin' scope)"
@@ -904,7 +904,12 @@
 		},
 		{
 			"key": "todo_id",
-			"value": "",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "username",
+			"value": "johndoe",
 			"type": "string"
 		}
 	]
