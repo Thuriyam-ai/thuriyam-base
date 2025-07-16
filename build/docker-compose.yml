@@ -1,31 +1,22 @@
 services:
-  workindia-jobs-ms:
+  thuriyam-base-ms:
     platform: linux/amd64
     build:
       context: ../app
       dockerfile: DockerfileLocal
-    container_name: workindia-jobs-ms
+    container_name: thuriyam-base-ms
     restart: always
     ports:
       - "8000:8000" # FastAPI service will be running on port 8000
       - "5678:5678" # Debugpy will be listening for connections, allowing the VSCode debugger to add breakpoints during execution.
     command: bash -c "python3 main.py runserver --host 0.0.0.0 --port 8000"
-    environment:
-      - KAFKA_BOOTSTRAP_SERVER=kafka:9092
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - MYSQL_HOST=mysql
-      - MYSQL_PORT=3306
-      - STATSD_HOST=statsd
-      - STATSD_PORT=9125
-      - MONGO_DATABASE_HOST=mongo
-      - MONGO_DATABASE_PORT=27017
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - ES_HOST=elasticsearch
-      - ES_PORT=9200
-      - ES8_HOST=elasticsearch8
-      - ES8_PORT=9200
+    env_file:
+      - docker.env
+    depends_on:
+      - postgres
+      - redis
+      - mongo
+      - kafka
 
   kafka_zookeeper:
     platform: linux/amd64
@@ -72,8 +63,8 @@ services:
     restart: always
     environment:
       - MONGODB_ROOT_PASSWORD=admin
-      - MONGODB_USERNAME=workindia
-      - MONGODB_PASSWORD=workindia
+      - MONGODB_USERNAME=admin
+      - MONGODB_PASSWORD=admin
 
   redis:
     image: "bitnami/redis"
@@ -91,8 +82,28 @@ services:
         max-size: "100m"
         max-file: "3"
 
+  postgres:
+    platform: linux/amd64
+    image: postgres:15
+    container_name: thuriyam-postgres
+    restart: always
+    environment:
+      - POSTGRES_DB=thuriyam_base
+      - POSTGRES_USER=thuriyam_user
+      - POSTGRES_PASSWORD=thuriyam_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U thuriyam_user -d thuriyam_base"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
   zookeeper_data: {}
   kafka_data: {}
   redis_data: {}
   mongodb_data: {}
+  postgres_data: {}

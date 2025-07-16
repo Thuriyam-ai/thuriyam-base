@@ -1,11 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.10
-
-# Install locale packages and generate locale
-RUN apt-get update && apt-get install -y locales && \
-    locale-gen en_US.UTF-8 && \
-    update-locale LANG=en_US.UTF-8 && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
 
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONIOENCODING UTF-8
@@ -13,7 +6,7 @@ ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LC_TYPE en_US.UTF-8
-ENV PIP_EXTRA_INDEX_URL http://admin:admin@pypi.workindia.in:8081/simple/
+# ENV PIP_EXTRA_INDEX_URL http://admin:admin@pypi.workindia.in:8081/simple/
 
 RUN pip3 install --upgrade pip==24.0
 
@@ -22,7 +15,8 @@ RUN pip3 install -r /config/base.txt
 
 ADD requirements/development.txt /config/development.txt
 
-RUN pip3 install -r /config/development.txt --trusted-host pypi.workindia.in
+# RUN pip3 install -r /config/development.txt --trusted-host pypi.workindia.in
+RUN pip3 install -r /config/development.txt
 
 RUN mkdir -p /src;
 WORKDIR /src

@@ -6,7 +6,7 @@ ENV LANGUAGE en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
 ENV LANG en_US.UTF-8
 ENV LC_TYPE en_US.UTF-8
-ENV PIP_EXTRA_INDEX_URL http://admin:admin@pypi.workindia.in:8081/simple/
+# ENV PIP_EXTRA_INDEX_URL http://admin:admin@pypi.workindia.in:8081/simple/
 
 RUN mkdir /config
 RUN mkdir /libs
@@ -22,7 +22,8 @@ RUN pip3 install --upgrade pip
 RUN mkdir -p /config
 ADD requirements/base.txt /config/base.txt
 ADD requirements/staging.txt /config/requirements.txt
-RUN pip3 install -r /config/requirements.txt --trusted-host pypi.workindia.in
+# RUN pip3 install -r /config/requirements.txt --trusted-host pypi.workindia.in
+RUN pip3 install -r /config/requirements.txt
 
 RUN mkdir -p /src;
 WORKDIR /src
