@@ -1,6 +1,6 @@
 {
 	"info": {
-		"_postman_id": "d1b58c32-40ae-4a3d-97df-44ff797b263b",
+		"_postman_id": "cca5c3e3-83b1-4b50-a170-084a821fed57",
 		"name": "Thuriyam Base API",
 		"description": "A comprehensive collection for the Thuriyam Base FastAPI microservice template with authentication, user management, and todo management endpoints.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
@@ -70,12 +70,23 @@
 						{
 							"listen": "test",
 							"script": {
-								"exec": [
-									"pm.collectionVariables.set(\"access_token\", pm.response.json().access_token);",
-									""
-								],
 								"type": "text/javascript",
-								"packages": {}
+								"exec": [
+									"// Extract access token from login response and store it globally",
+									"if (pm.response.code === 200) {",
+									"    const responseJson = pm.response.json();",
+									"    if (responseJson.access_token) {",
+									"        pm.collectionVariables.set('access_token', responseJson.access_token);",
+									"        console.log('Access token stored successfully');",
+									"        console.log('Token:', responseJson.access_token.substring(0, 20) + '...');",
+									"    } else {",
+									"        console.error('No access_token found in response');",
+									"    }",
+									"} else {",
+									"    console.error('Login failed with status:', pm.response.code);",
+									"    console.log('Response:', pm.response.text());",
+									"}"
+								]
 							}
 						}
 					],
@@ -92,17 +103,17 @@
 							"urlencoded": [
 								{
 									"key": "username",
-									"value": "pmundhra",
+									"value": "johndoe",
 									"description": "Username or email"
 								},
 								{
 									"key": "password",
-									"value": "Pr@m0d#123",
+									"value": "securepassword123",
 									"description": "User password"
 								},
 								{
 									"key": "scope",
-									"value": "users",
+									"value": "me",
 									"description": "OAuth2 scope (optional)"
 								}
 							]
@@ -131,25 +142,32 @@
 			"item": [
 				{
 					"name": "Get Current User",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"description": "Bearer token from login"
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token from login'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
 							}
-						],
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/users/me",
 							"host": [
@@ -168,25 +186,32 @@
 				},
 				{
 					"name": "Get All Users",
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{access_token}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"description": "Bearer token with 'users' scope"
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token with users scope'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
 							}
-						],
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/users/?skip=0&limit=100",
 							"host": [
@@ -217,15 +242,32 @@
 				},
 				{
 					"name": "Get User by Username",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token with admin scope'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"description": "Bearer token with 'admin' scope"
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/users/johndoe",
 							"host": [
@@ -244,17 +286,35 @@
 				},
 				{
 					"name": "Update User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token with admin scope'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
 							{
 								"key": "Content-Type",
 								"value": "application/json"
-							},
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"description": "Bearer token with 'admin' scope"
 							}
 						],
 						"body": {
@@ -279,15 +339,32 @@
 				},
 				{
 					"name": "Delete User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token with admin scope'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access_token}}",
-								"description": "Bearer token with 'admin' scope"
-							}
-						],
+						"header": [],
 						"url": {
 							"raw": "{{base_url}}/api/v1/users/johndoe",
 							"host": [
@@ -312,6 +389,29 @@
 			"item": [
 				{
 					"name": "Create Todo",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for todo operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "POST",
 						"header": [
@@ -342,6 +442,29 @@
 				},
 				{
 					"name": "Get All Todos",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for todo operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -387,6 +510,29 @@
 				},
 				{
 					"name": "Get Todos by Completion Status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for todo operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -425,6 +571,29 @@
 				},
 				{
 					"name": "Search Todos by Title",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for todo operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -463,6 +632,29 @@
 				},
 				{
 					"name": "Get Todo by ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for todo operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -484,6 +676,29 @@
 				},
 				{
 					"name": "Update Todo",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for todo operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "PUT",
 						"header": [
@@ -514,6 +729,29 @@
 				},
 				{
 					"name": "Toggle Todo Completion",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for todo operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -536,6 +774,29 @@
 				},
 				{
 					"name": "Delete Todo",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for todo operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -565,7 +826,42 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					""
+					"// Collection-level pre-request script",
+					"// This script runs before every request in the collection",
+					"console.log('Collection pre-request script executed');",
+					"",
+					"// Check if this is a request that needs authentication",
+					"const requestUrl = pm.request.url.toString();",
+					"const isAuthRequest = requestUrl.includes('/users/token') || requestUrl.includes('/users/');",
+					"const isTodoRequest = requestUrl.includes('/todos/');",
+					"",
+					"// Skip auto-authorization for health check and login requests",
+					"if (requestUrl.includes('/') && !isAuthRequest && !isTodoRequest) {",
+					"    return; // Skip for health check",
+					"}",
+					"",
+					"if (requestUrl.includes('/users/token')) {",
+					"    return; // Skip for login request",
+					"}",
+					"",
+					"// Auto-add Authorization header for authenticated endpoints",
+					"if (isAuthRequest || isTodoRequest) {",
+					"    const accessToken = pm.collectionVariables.get('access_token');",
+					"    if (accessToken && accessToken.trim() !== '') {",
+					"        // Check if Authorization header already exists",
+					"        const existingAuthHeader = pm.request.headers.get('Authorization');",
+					"        if (!existingAuthHeader) {",
+					"            pm.request.headers.add({",
+					"                key: 'Authorization',",
+					"                value: 'Bearer ' + accessToken,",
+					"                'description': 'Bearer token added automatically'",
+					"            });",
+					"            console.log('Authorization header added automatically at collection level');",
+					"        }",
+					"    } else {",
+					"        console.warn('No access_token found. Please run Login for Access Token first.');",
+					"    }",
+					"}"
 				]
 			}
 		},
@@ -574,7 +870,23 @@
 			"script": {
 				"type": "text/javascript",
 				"exec": [
-					""
+					"// Collection-level test script",
+					"// This script runs after every request in the collection",
+					"console.log('Collection test script executed');",
+					"",
+					"// Log response status and time",
+					"console.log('Response Status:', pm.response.status);",
+					"console.log('Response Time:', pm.response.responseTime + 'ms');",
+					"",
+					"// Check for common error responses",
+					"if (pm.response.code === 401) {",
+					"    console.error('Unauthorized - Token may be expired or invalid');",
+					"    console.log('Please run Login for Access Token again');",
+					"} else if (pm.response.code === 403) {",
+					"    console.error('Forbidden - Insufficient permissions');",
+					"} else if (pm.response.code >= 500) {",
+					"    console.error('Server Error - Check server logs');",
+					"}"
 				]
 			}
 		}
