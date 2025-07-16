@@ -11,10 +11,20 @@ config = settings.get_config()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create SQLAlchemy engine
+# Create SQLAlchemy engine with conditional connect_args
+def get_connect_args(database_url: str):
+    """Get appropriate connect_args based on database type"""
+    if database_url.startswith("sqlite"):
+        logger.info("Using SQLite database with check_same_thread=False")
+        return {"check_same_thread": False}  # Needed for SQLite
+    else:
+        logger.info("Using PostgreSQL database")
+        return {}  # No special args needed for PostgreSQL
+
+logger.info(f"Creating database engine with URL: {config.SQLALCHEMY_DATABASE_URL}")
 engine = create_engine(
     config.SQLALCHEMY_DATABASE_URL,
-    connect_args={"check_same_thread": False}  # Needed for SQLite
+    connect_args=get_connect_args(config.SQLALCHEMY_DATABASE_URL)
 )
 
 # Create SessionLocal class
@@ -25,7 +35,22 @@ def get_db():
     db = SessionLocal()
     try:
         yield db
+    except Exception as e:
+        logger.error(f"Database session error: {e}")
+        db.rollback()
+        raise
     finally:
         db.close()
+
+def test_database_connection():
+    """Test database connection and return status"""
+    try:
+        with engine.connect() as connection:
+            result = connection.execute("SELECT 1")
+            logger.info("Database connection test successful")
+            return True
+    except Exception as e:
+        logger.error(f"Database connection test failed: {e}")
+        return False
 
  

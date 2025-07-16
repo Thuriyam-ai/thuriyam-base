@@ -156,12 +156,47 @@ export SQLALCHEMY_DATABASE_URL="sqlite:///./my_database.db"
 
 ## Docker Support
 
-### Development
+### Local Development (SQLite)
+
+For local development, the application uses SQLite by default:
 
 ```bash
 docker build -f DockerfileLocal -t thuriyam-dev .
 docker run -p 8000:8000 thuriyam-dev
 ```
+
+### Docker Environment (PostgreSQL)
+
+For a complete Docker environment with PostgreSQL, Redis, MongoDB, and Kafka:
+
+```bash
+cd build
+docker-compose up -d
+```
+
+This will start:
+- **PostgreSQL**: Database server on port 5432
+- **Redis**: Cache server on port 6379
+- **MongoDB**: NoSQL database on port 27017
+- **Kafka**: Message broker on port 9092
+- **FastAPI Application**: On port 8000
+
+#### Database Configuration
+
+- **Local Development**: Uses SQLite (`thuriyam.db`)
+- **Docker Environment**: Uses PostgreSQL with the following configuration:
+  - Database: `thuriyam_base`
+  - User: `thuriyam_user`
+  - Password: `thuriyam_password`
+  - Host: `postgres` (Docker service name)
+  - Port: `5432`
+
+#### Environment Variables
+
+The Docker environment uses `build/docker.env` which sets:
+- `FLAVOUR=docker` (uses DockerConfig)
+- `SQLALCHEMY_DATABASE_URL=postgresql://thuriyam_user:thuriyam_password@postgres:5432/thuriyam_base`
+- Service hostnames for Redis, MongoDB, Kafka, etc.
 
 ### Production
 

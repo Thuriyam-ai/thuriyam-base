@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from core import settings
 from core.settings.development import DevConfig
 from core.settings.production import ProdConfig
+from core.settings.docker import DockerConfig
 # from core.settings.staging import StagingConfig
 
 from applifespan import app_lifespan
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 # Register configurations
 settings.register("dev", DevConfig)
 settings.register("prod", ProdConfig)
+settings.register("docker", DockerConfig)
 # register("staging", StagingConfig)
 
 config = settings.get_config()
@@ -50,4 +52,12 @@ async def root():
     
     Returns the service status to verify the API is running.
     """
-    return {"message": "Thuriyam Base Template Service is running", "status": "healthy"}
+    from core.database import test_database_connection
+    
+    db_status = "healthy" if test_database_connection() else "unhealthy"
+    
+    return {
+        "message": "Thuriyam Base Template Service is running", 
+        "status": "healthy",
+        "database": db_status
+    }
