@@ -1,8 +1,5 @@
-from typing import TypeVar
 from enum import Enum, auto
 from pydantic import BaseModel
-
-T = TypeVar('T')
 
 class Operation(Enum):
     CREATE = auto()
