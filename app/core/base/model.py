@@ -2,11 +2,9 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, String, DateTime
 from datetime import datetime, timezone
 from .validator import Operation, BaseValidator
-from typing import Any, Dict, Generic, TypeVar, Type
+from typing import Any, Dict, Type
 import copy
 import uuid
-
-T = TypeVar('T', bound='BaseModel')
 
 Base = declarative_base()
 
@@ -35,13 +33,13 @@ class BaseModel(Base):
 
 
 # Remove generics from ModelBuilder and cleanup the code
-class ModelBuilder(Generic[T]):
+class ModelBuilder():
     """
     A generic model builder that can create instances of any model type.
     Provides a fluent interface for building models with validation.
     """
     
-    def __init__(self, model_class: Type[T]):
+    def __init__(self, model_class: Type):
         """
         Initialize the model builder with a specific model class.
         
@@ -53,7 +51,7 @@ class ModelBuilder(Generic[T]):
         self.attributes: Dict[str, Any] = {}
         self._auto_generate_id = True
     
-    def with_operation(self, operation: Operation) -> 'ModelBuilder[T]':
+    def with_operation(self, operation: Operation) -> 'ModelBuilder':
         """
         Set the operation type for validation.
         
@@ -66,7 +64,7 @@ class ModelBuilder(Generic[T]):
         self.operation = operation
         return self
     
-    def with_attributes(self, attributes: Dict[str, Any]) -> 'ModelBuilder[T]':
+    def with_attributes(self, attributes: Dict[str, Any]) -> 'ModelBuilder':
         """
         Set the attributes for the model.
         
@@ -79,7 +77,7 @@ class ModelBuilder(Generic[T]):
         self.attributes = copy.deepcopy(attributes)
         return self
     
-    def with_attribute(self, key: str, value: Any) -> 'ModelBuilder[T]':
+    def with_attribute(self, key: str, value: Any) -> 'ModelBuilder':
         """
         Set a single attribute for the model.
         
@@ -93,7 +91,7 @@ class ModelBuilder(Generic[T]):
         self.attributes[key] = value
         return self
     
-    def without_auto_id(self) -> 'ModelBuilder[T]':
+    def without_auto_id(self) -> 'ModelBuilder':
         """
         Disable automatic ID generation.
         
@@ -103,7 +101,7 @@ class ModelBuilder(Generic[T]):
         self._auto_generate_id = False
         return self
     
-    def build(self) -> T:
+    def build(self) -> Any:
         """
         Build and return a new instance of the model.
         
@@ -138,7 +136,7 @@ class ModelBuilder(Generic[T]):
         return instance
     
     @classmethod
-    def for_model(cls, model_class: Type[T]) -> 'ModelBuilder[T]':
+    def for_model(cls, model_class: Type) -> 'ModelBuilder':
         """
         Create a new ModelBuilder for the specified model class.
         
@@ -152,7 +150,7 @@ class ModelBuilder(Generic[T]):
 
 
 # Convenience function for quick model building
-def build_model(model_class: Type[T], attributes: Dict[str, Any], operation: Operation = Operation.CREATE) -> T:
+def build_model(model_class: Type, attributes: Dict[str, Any], operation: Operation = Operation.CREATE) -> Any:
     """
     Convenience function to quickly build a model instance.
     
