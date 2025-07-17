@@ -52,7 +52,7 @@ if docker-compose exec -T postgres pg_isready -U thuriyam_user -d thuriyam_base;
     if [ "$table_count" -eq "0" ]; then
         echo "📊 No tables found. Creating database tables..."
         # Run Docker-specific database initialization
-        docker-compose exec -T thuriyam-base-ms python3 /src/scripts/init_docker_db.py
+        docker-compose exec -T thuriyam-base-ms python3 ../scripts/init_docker_db.py
         if [ $? -eq 0 ]; then
             echo "✅ Database tables created successfully!"
         else
@@ -91,4 +91,4 @@ echo "   - View logs: docker-compose logs -f"
 echo "   - Stop services: docker-compose down"
 echo "   - Restart services: docker-compose restart"
 echo "   - Access PostgreSQL: docker-compose exec postgres psql -U thuriyam_user -d thuriyam_base"
-echo "   - Initialize database manually: docker-compose exec thuriyam-base-ms python3 /src/scripts/init_docker_db.py" 
+echo "   - Initialize database manually: docker-compose exec thuriyam-base-ms python3 ../scripts/init_docker_db.py" 
