@@ -23,30 +23,6 @@ class BaseModel(Base):
 
     _unset = []
 
-    @classmethod
-    def get_validator(cls, operation: Operation) -> Any:
-        raise NotImplementedError("Subclasses must implement this method")
-
-    @classmethod
-    def build(cls, input: Dict[str, Any]) -> Any:
-        """Create a new instance with validated attributes"""
-        # Create new instance of the calling class
-        instance = cls()
-        
-        # Deep copy to avoid modifying original input
-        attributes = copy.deepcopy(input)
-
-        # Remove unset attributes
-        instance.unset(attributes)
-
-        # Validate input data
-        cls.get_validator(Operation.CREATE).validate(attributes)
-
-        # Set validated attributes
-        instance.set_attributes(attributes)
-
-        return instance
-
     def unset(self, attributes: Dict[str, Any]) -> None:
         """Remove specified attributes from the input dictionary"""
         for key in self._unset:
@@ -58,6 +34,7 @@ class BaseModel(Base):
             setattr(self, key, value)
 
 
+# Remove generics from ModelBuilder and cleanup the code
 class ModelBuilder(Generic[T]):
     """
     A generic model builder that can create instances of any model type.
