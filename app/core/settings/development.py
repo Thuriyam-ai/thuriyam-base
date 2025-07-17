@@ -10,13 +10,16 @@ _MONGO_PASSWORD = None
 
 
 class DevConfig(BaseConfig):
-    """Development configuration"""
+    """Development configuration - uses Docker services for local development"""
 
     DEBUG: bool = True
     ALLOWED_HOSTS_REGEX: str = r"^.*$"
 
     DOCS_URL: str = "/docs"
     REDOC_URL: str = "/redoc"
+
+    # Database URL is set via environment variable SQLALCHEMY_DATABASE_URL
+    # Default: postgresql://thuriyam_user:thuriyam_password@localhost:5432/thuriyam_base
 
     NOSQL_DATABASES: Dict[str, Any] = {
         "mongodb": {
@@ -87,7 +90,7 @@ class DevConfig(BaseConfig):
         "PORT": 8080,
     }
 
-    # StatsD
+    # StatsD - use StatsD from Docker
     STATSD_HOST: str = "localhost"
     STATSD_PORT: Union[str, int] = 9125
     STATSD_SERVICE_NAME: str = "wi-job-notification-ms"

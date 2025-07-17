@@ -20,7 +20,7 @@ class BaseConfig(BaseSettings, extra="ignore"):
     ALLOWED_HOSTS: Optional[list] = None
 
     # Database
-    SQLALCHEMY_DATABASE_URL: str = config("SQLALCHEMY_DATABASE_URL", default="sqlite:///./thuriyam.db")
+    SQLALCHEMY_DATABASE_URL: str = config("SQLALCHEMY_DATABASE_URL", default="postgresql://thuriyam_user:thuriyam_password@localhost:5432/thuriyam_base")
     
     # CORS
     ALLOWED_HOSTS_REGEX: str = r"^http://.*\.thuriyam\.local$|^https://.*\.thuriyam\.in$" # Matches URLs with 'http' that end with '.thuriyam.local' and only 'https' with '.thuriyam.in'.
