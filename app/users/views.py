@@ -5,12 +5,12 @@ from sqlalchemy.orm import Session
 from core.database import get_db
 from users.schema import User, UserCreate, UserUpdate
 from users.service import UserService
-from core.config import get_settings
+from core.settings import get_config
 from core.security.auth import get_current_user
 from datetime import timedelta
 
 router = APIRouter(prefix="/users", tags=["users"])
-settings = get_settings()
+settings = get_config()
 
 @router.post("/", response_model=User, status_code=status.HTTP_201_CREATED)
 def create_user(user: UserCreate, db: Session = Depends(get_db)):

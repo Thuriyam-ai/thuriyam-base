@@ -1,12 +1,12 @@
 from typing import Optional, List
 from users.model import User
-from core.config import get_settings
+from core.settings import get_config
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 from core.base import BaseRepository
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-settings = get_settings()
+settings = get_config()
 
 class UserRepository(BaseRepository[User]):
     def __init__(self, db: Session):

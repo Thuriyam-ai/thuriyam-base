@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta, UTC
 from typing import Optional, Dict, Any
 from jose import JWTError, jwt
-from core.config import get_settings
+from core.settings import get_config
 
-settings = get_settings()
+settings = get_config()
 
 def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()

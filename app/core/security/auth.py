@@ -6,13 +6,13 @@ from core.database import get_db
 from users.schema import User
 from users.repository import UserRepository
 from core.security.jwt import decode_token
-from core.config import get_settings
+from core.settings import get_config
 
-settings = get_settings()
+settings = get_config()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/users/token",
+    tokenUrl=f"{settings.API_PREFIX}/users/token",
     scopes={
         "me": "Read information about the current user.",
         "users": "Read information about all users.",

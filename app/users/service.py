@@ -2,7 +2,7 @@ from datetime import timedelta
 from typing import Optional
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from core.config import get_settings
+from core.settings import get_config
 from core.database import get_db
 from core.base.model import ModelBuilder, Operation
 from core.security.auth import verify_password, get_password_hash
@@ -11,7 +11,7 @@ from users.model import User
 from users.schema import UserCreate, UserUpdate
 from users.repository import UserRepository
 
-settings = get_settings()
+settings = get_config()
 
 class UserService:
     def __init__(self, db: Session = Depends(get_db)):
