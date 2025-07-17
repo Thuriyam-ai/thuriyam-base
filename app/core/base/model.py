@@ -17,7 +17,11 @@ class BaseModel(Base):
 
     id = Column(String, primary_key=True)
     created_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc)) 
+    created_by = Column(String, nullable=True)
+    updated_at = Column(DateTime(timezone=True), default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    deleted_at = Column(DateTime(timezone=True), nullable=True)
+    # TODO: Check if this is the right approach to handle deleted_by audit trail
+    deleted_by = Column(String, nullable=True)
 
     _unset = []
 
