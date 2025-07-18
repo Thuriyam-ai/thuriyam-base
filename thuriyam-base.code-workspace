@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "../thuriyam-voice-studio-61"
 		}
 	],
 	"settings": {}
