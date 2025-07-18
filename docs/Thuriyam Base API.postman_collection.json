@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "d4f9b38b-1ad1-4ca3-ae1e-b8d270266749",
 		"name": "Thuriyam Base API",
-		"description": "A comprehensive collection for the Thuriyam Base FastAPI microservice template with authentication, user management, and todo management endpoints.",
+		"description": "A comprehensive collection for the Thuriyam Base FastAPI microservice template with authentication, user management, todo management, and campaign management endpoints.",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "36241258"
 	},
@@ -113,8 +113,8 @@
 								},
 								{
 									"key": "scope",
-									"value": "me",
-									"description": "OAuth2 scope (optional)"
+									"value": "me campaigns:read campaigns:write campaigns:manage",
+									"description": "OAuth2 scopes - space separated (me, users, admin, campaigns:read, campaigns:write, campaigns:manage)"
 								}
 							]
 						},
@@ -130,7 +130,7 @@
 								"token"
 							]
 						},
-						"description": "OAuth2 compatible token login, get an access token for future requests"
+						"description": "OAuth2 compatible token login, get an access token for future requests. Available scopes: me, users, admin, campaigns:read, campaigns:write, campaigns:manage"
 					},
 					"response": []
 				}
@@ -818,6 +818,694 @@
 				}
 			],
 			"description": "Todo management endpoints (CRUD operations with filtering and search)"
+		},
+		{
+			"name": "Campaigns",
+			"item": [
+				{
+					"name": "Create Campaign",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Summer Marketing Campaign\",\n  \"description\": \"Comprehensive summer marketing campaign targeting millennials\",\n  \"campaign_type\": \"social\",\n  \"status\": \"draft\",\n  \"start_date\": \"2024-06-01T00:00:00Z\",\n  \"end_date\": \"2024-08-31T23:59:59Z\",\n  \"budget\": 50000.00,\n  \"target_audience\": \"Millennials aged 25-35, interested in outdoor activities\",\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								""
+							]
+						},
+						"description": "Create a new marketing campaign with name, description, type, status, dates, budget, and target audience"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Campaigns",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/?skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								""
+							],
+							"query": [
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return (1-1000)"
+								},
+								{
+									"key": "status",
+									"value": "",
+									"description": "Filter by campaign status (draft, active, paused, completed, cancelled)",
+									"disabled": true
+								},
+								{
+									"key": "campaign_type",
+									"value": "",
+									"description": "Filter by campaign type (email, social, display, search, content, influencer, other)",
+									"disabled": true
+								},
+								{
+									"key": "name",
+									"value": "",
+									"description": "Search by name containing this text",
+									"disabled": true
+								},
+								{
+									"key": "active_only",
+									"value": "false",
+									"description": "Show only active campaigns (true/false)",
+									"disabled": true
+								}
+							]
+						},
+						"description": "Get all campaigns with optional filtering and pagination"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Campaigns by Status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/?status=active&skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								""
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "active",
+									"description": "Filter by campaign status"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return"
+								}
+							]
+						},
+						"description": "Get campaigns filtered by status"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Campaigns by Type",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/?campaign_type=social&skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								""
+							],
+							"query": [
+								{
+									"key": "campaign_type",
+									"value": "social",
+									"description": "Filter by campaign type"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return"
+								}
+							]
+						},
+						"description": "Get campaigns filtered by campaign type"
+					},
+					"response": []
+				},
+				{
+					"name": "Search Campaigns by Name",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/?name=Summer&skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								""
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Summer",
+									"description": "Search by name containing this text"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return"
+								}
+							]
+						},
+						"description": "Search campaigns by name containing specific text"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Active Campaigns Only",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/?active_only=true&skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								""
+							],
+							"query": [
+								{
+									"key": "active_only",
+									"value": "true",
+									"description": "Show only campaigns with status='active' and is_active=true"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return"
+								}
+							]
+						},
+						"description": "Get only active campaigns (status='active' and is_active=true)"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Campaigns by Date Range",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/date-range/?start_date=2024-06-01T00:00:00Z&end_date=2024-12-31T23:59:59Z&skip=0&limit=100",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								"date-range",
+								""
+							],
+							"query": [
+								{
+									"key": "start_date",
+									"value": "2024-06-01T00:00:00Z",
+									"description": "Start date for the range (ISO 8601 format)"
+								},
+								{
+									"key": "end_date",
+									"value": "2024-12-31T23:59:59Z",
+									"description": "End date for the range (ISO 8601 format)"
+								},
+								{
+									"key": "skip",
+									"value": "0",
+									"description": "Number of records to skip for pagination"
+								},
+								{
+									"key": "limit",
+									"value": "100",
+									"description": "Maximum number of records to return"
+								}
+							]
+						},
+						"description": "Get campaigns that overlap with the specified date range"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Campaign by ID",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/{{campaign_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								"{{campaign_id}}"
+							]
+						},
+						"description": "Get a specific campaign by its ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Campaign",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Updated Summer Marketing Campaign\",\n  \"description\": \"Updated comprehensive summer marketing campaign targeting millennials and Gen Z\",\n  \"campaign_type\": \"social\",\n  \"status\": \"active\",\n  \"start_date\": \"2024-06-01T00:00:00Z\",\n  \"end_date\": \"2024-09-30T23:59:59Z\",\n  \"budget\": 75000.00,\n  \"target_audience\": \"Millennials and Gen Z aged 18-35, interested in outdoor activities and sustainability\",\n  \"is_active\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/{{campaign_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								"{{campaign_id}}"
+							]
+						},
+						"description": "Update an existing campaign with new data (all fields are optional for partial updates)"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Campaign Status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/{{campaign_id}}/status?new_status=active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								"{{campaign_id}}",
+								"status"
+							],
+							"query": [
+								{
+									"key": "new_status",
+									"value": "active",
+									"description": "New status (draft, active, paused, completed, cancelled)"
+								}
+							]
+						},
+						"description": "Update the status of a campaign"
+					},
+					"response": []
+				},
+				{
+					"name": "Toggle Campaign Active Status",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/{{campaign_id}}/toggle-active",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								"{{campaign_id}}",
+								"toggle-active"
+							]
+						},
+						"description": "Toggle the is_active status of a campaign (switches from true to false or vice versa)"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Campaign",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// Auto-add Authorization header if access_token exists",
+									"const accessToken = pm.collectionVariables.get('access_token');",
+									"if (accessToken && accessToken.trim() !== '') {",
+									"    pm.request.headers.add({",
+									"        key: 'Authorization',",
+									"        value: 'Bearer ' + accessToken,",
+									"        description: 'Bearer token for campaign operations'",
+									"    });",
+									"    console.log('Authorization header added automatically');",
+									"} else {",
+									"    console.warn('No access_token found. Please run Login for Access Token first.');",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/campaigns/{{campaign_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"campaigns",
+								"{{campaign_id}}"
+							]
+						},
+						"description": "Delete a campaign by its ID"
+					},
+					"response": []
+				}
+			],
+			"description": "Campaign management endpoints (CRUD operations with advanced filtering, status management, and date range queries)"
 		}
 	],
 	"event": [
@@ -830,22 +1518,23 @@
 					"// This script runs before every request in the collection",
 					"console.log('Collection pre-request script executed');",
 					"",
-					"// Check if this is a request that needs authentication",
-					"const requestUrl = pm.request.url.toString();",
-					"const isAuthRequest = requestUrl.includes('/users/token') || requestUrl.includes('/users/');",
-					"const isTodoRequest = requestUrl.includes('/todos/');",
-					"",
-					"// Skip auto-authorization for health check and login requests",
-					"if (requestUrl.includes('/') && !isAuthRequest && !isTodoRequest) {",
-					"    return; // Skip for health check",
-					"}",
-					"",
-					"if (requestUrl.includes('/users/token')) {",
-					"    return; // Skip for login request",
-					"}",
-					"",
-					"// Auto-add Authorization header for authenticated endpoints",
-					"if (isAuthRequest || isTodoRequest) {",
+								"// Check if this is a request that needs authentication",
+			"const requestUrl = pm.request.url.toString();",
+			"const isAuthRequest = requestUrl.includes('/users/token') || requestUrl.includes('/users/');",
+			"const isTodoRequest = requestUrl.includes('/todos/');",
+			"const isCampaignRequest = requestUrl.includes('/campaigns/');",
+			"",
+			"// Skip auto-authorization for health check and login requests",
+			"if (requestUrl.includes('/') && !isAuthRequest && !isTodoRequest && !isCampaignRequest) {",
+			"    return; // Skip for health check",
+			"}",
+			"",
+			"if (requestUrl.includes('/users/token')) {",
+			"    return; // Skip for login request",
+			"}",
+			"",
+			"// Auto-add Authorization header for authenticated endpoints",
+			"if (isAuthRequest || isTodoRequest || isCampaignRequest) {",
 					"    const accessToken = pm.collectionVariables.get('access_token');",
 					"    if (accessToken && accessToken.trim() !== '') {",
 					"        // Check if Authorization header already exists",
@@ -910,6 +1599,11 @@
 		{
 			"key": "username",
 			"value": "johndoe",
+			"type": "string"
+		},
+		{
+			"key": "campaign_id",
+			"value": "1",
 			"type": "string"
 		}
 	]

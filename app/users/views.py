@@ -31,6 +31,14 @@ def login_for_access_token(
     OAuth2 compatible token login, get an access token for future requests.
     
     This endpoint allows users to authenticate and receive an access token.
+    
+    Available scopes:
+    - me: Read information about the current user
+    - users: Read information about all users
+    - admin: Admin access to all operations
+    - campaigns:read: Read campaign information
+    - campaigns:write: Create and update campaigns
+    - campaigns:manage: Full campaign management including status changes
     """
     user_service = UserService(db)
     user = user_service.authenticate_user(form_data.username, form_data.password)

@@ -26,6 +26,7 @@ from core.base.model import Base
 # This is important for autogenerate to work properly
 import users.model
 import todos.model
+import campaigns.model
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

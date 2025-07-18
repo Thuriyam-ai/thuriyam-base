@@ -16,7 +16,10 @@ oauth2_scheme = OAuth2PasswordBearer(
     scopes={
         "me": "Read information about the current user.",
         "users": "Read information about all users.",
-        "admin": "Admin access to all operations."
+        "admin": "Admin access to all operations.",
+        "campaigns:read": "Read campaign information.",
+        "campaigns:write": "Create and update campaigns.",
+        "campaigns:manage": "Full campaign management including status changes."
     }
 )
 
