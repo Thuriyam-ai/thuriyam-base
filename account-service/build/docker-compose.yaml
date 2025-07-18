@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  account-service:
+    build: .
+    ports:
+      - "8001:8000"
+    environment:
+      - FLAVOUR=docker
+      - SQLALCHEMY_DATABASE_URL=postgresql://thuriyam_user:thuriyam_password@account-db:5432/account_db
+      - SECRET_KEY=your-secret-key-here
+    depends_on:
+      - account-db
+    networks:
+      - account-network
+
+  account-db:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=account_db
+      - POSTGRES_USER=thuriyam_user
+      - POSTGRES_PASSWORD=thuriyam_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - account_db_data:/var/lib/postgresql/data
+    networks:
+      - account-network
+
+volumes:
+  account_db_data: {}
+
+networks:
+  account-network:
+    driver: bridge

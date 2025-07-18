@@ -1,0 +1,43 @@
+from enum import Enum, auto
+from pydantic import BaseModel
+
+class Operation(Enum):
+    CREATE = auto()
+    UPDATE = auto()
+    DELETE = auto()
+    STATE_CHANGE = auto()
+
+class BaseValidator:
+    registry: dict[str, type] = {}
+    _instance: "BaseValidator" = None
+
+    @classmethod
+    def get_instance(cls):
+        if not cls._instance:
+            print("Initializing BaseValidator...")
+            cls._instance = BaseValidator()
+        return cls._instance
+
+    def __get_key(self, entity: type, operation: Operation):
+        return f"{operation.name}@{entity.__name__}" 
+
+    def validate(self, entity: type, operation: Operation, input):
+        key = self.__get_key(entity, operation)
+
+        print(f"Fetching validator for {operation}@{entity.__name__}")
+        klass = self.registry.get(key)
+        if not klass:
+            print(f"Unable to find a validator for the entity {entity.__name__} for operation {operation}")
+            return None
+
+        # handle different types of error here
+        return klass(**input)
+
+    def register(self, entity: type, operation: Operation, validator: type):
+        key = self.__get_key(entity, operation)
+
+        if (validator is None or
+                not issubclass(validator, BaseModel)):
+            raise Exception(
+                f"No registered validator found for {entity.__name__} & {operation}")
+        self.registry[key] = validator
