@@ -46,7 +46,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john@example.com\",\n  \"full_name\": \"John Doe\",\n  \"password\": \"securepassword123\"\n}"
+							"raw": "{\n  \"username\": \"johndoe\",\n  \"email\": \"john@example.com\",\n  \"full_name\": \"John Doe\",\n  \"password\": \"SecurePassword@123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/users/",
@@ -108,7 +108,7 @@
 								},
 								{
 									"key": "password",
-									"value": "securepassword123",
+									"value": "SecurePassword@123",
 									"description": "User password"
 								},
 								{
