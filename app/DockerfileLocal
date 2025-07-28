@@ -9,14 +9,11 @@ ENV LC_TYPE en_US.UTF-8
 # ENV PIP_EXTRA_INDEX_URL http://admin:admin@pypi.workindia.in:8081/simple/
 
 RUN pip3 install --upgrade pip==24.0
+RUN pip3 install uv
 
-ADD requirements/base.txt /config/base.txt
-RUN pip3 install -r /config/base.txt
-
-ADD requirements/development.txt /config/development.txt
-
-# RUN pip3 install -r /config/development.txt --trusted-host pypi.workindia.in
-RUN pip3 install -r /config/development.txt
+ADD pyproject.toml /config/pyproject.toml
+WORKDIR /config
+RUN uv pip install -e ".[dev]" --system
 
 RUN mkdir -p /src;
 WORKDIR /src

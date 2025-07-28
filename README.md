@@ -20,12 +20,12 @@ A FastAPI-based microservice template with MongoDB, Redis, and SQLite support.
 ├── app/                    # FastAPI Application
 │   ├── core/              # Core modules (auth, database, settings)
 │   ├── todos/             # Todo module (example implementation)
-│   ├── requirements/      # Python dependencies
 │   ├── app.py            # FastAPI application
 │   ├── main.py           # CLI entry point
 │   └── applifespan.py    # Application lifecycle management
 ├── scripts/               # Database initialization scripts
 ├── test/                  # Postman collections and test files
+├── pyproject.toml         # Python project configuration and dependencies
 ├── DockerfileLocal        # Development Docker configuration
 ├── DockerfileProd         # Production Docker configuration
 ├── DockerfileStag         # Staging Docker configuration
@@ -35,7 +35,7 @@ A FastAPI-based microservice template with MongoDB, Redis, and SQLite support.
 ## Prerequisites
 
 - Python 3.11
-- pip (Python package manager)
+- uv (Ultra-fast Python package manager)
 - SQLite (included with Python)
 - Redis (optional, for caching)
 - MongoDB (optional, for NoSQL data)
@@ -49,21 +49,47 @@ git clone <repository-url>
 cd thuriyam-base-template
 ```
 
-### 2. Create Virtual Environment
+### 2. Install uv
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or with homebrew on macOS
+brew install uv
+
+# Or with pip
+pip install uv
 ```
 
 ### 3. Install Dependencies
 
 ```bash
 # Install base dependencies
-pip install -r app/requirements/base.txt
+uv pip install -e .
 
 # For development, also install development dependencies
-pip install -r app/requirements/development.txt
+uv pip install -e ".[dev]"
+
+# Alternative: Install specific environment dependencies
+uv pip install -e ".[production]"  # For production
+uv pip install -e ".[staging]"     # For staging
+```
+
+**Why uv?**
+- **10-100x faster** than pip for package installation
+- **Better dependency resolution** and conflict detection
+- **Compatible** with existing pip workflows
+- **Lockfile support** for reproducible builds
+
+**Optional: Using uv with Virtual Environments**
+```bash
+# Create and activate a virtual environment with uv
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies in the virtual environment
+uv pip install -e ".[dev]"
 ```
 
 ## Database Setup
