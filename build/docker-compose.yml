@@ -9,9 +9,11 @@ services:
     ports:
       - "8000:8000" # FastAPI service will be running on port 8000
       - "5678:5678" # Debugpy will be listening for connections, allowing the VSCode debugger to add breakpoints during execution.
-    command: bash -c "python3 main.py runserver --host 0.0.0.0 --port 8000"
+    command: bash -c "python3 main.py runserver --host 0.0.0.0 --port 8000 --reload"
     env_file:
       - docker.env
+    volumes:
+      - "../app:/src"  # Mount local app directory to container for hot reload
     depends_on:
       - postgres
       - redis
