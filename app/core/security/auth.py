@@ -78,8 +78,9 @@ async def get_current_user(
         print(f"Exception: {Exception}")
         raise
     
-    repository = UserRepository(db)
-    user = repository.get_user_by_username(username)
-    if user is None:
-        raise credentials_exception
-    return user 
+    # Under the assumption that the authn is done, we do not need to fetch the user from the database
+    # repository = UserRepository(db)
+    # user = repository.get_user_by_username(username)
+    # if user is None:
+    #     raise credentials_exception
+    return User(username=username) 
