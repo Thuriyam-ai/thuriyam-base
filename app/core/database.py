@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
 from core import settings
 
@@ -46,7 +46,7 @@ def test_database_connection():
     """Test database connection and return status"""
     try:
         with engine.connect() as connection:
-            result = connection.execute("SELECT 1")
+            result = connection.execute(text("SELECT 1"))
             logger.info("Database connection test successful")
             return True
     except Exception as e:
