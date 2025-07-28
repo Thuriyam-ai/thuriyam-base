@@ -17,6 +17,10 @@ def create_access_token(data: Dict[str, Any], expires_delta: Optional[timedelta]
 
 def decode_token(token: str) -> Dict[str, Any]:
     try:
+        # Remove "Bearer " prefix if present
+        if token.startswith("Bearer "):
+            token = token[7:]  # Remove "Bearer " (7 characters)
+
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return payload
     except JWTError:

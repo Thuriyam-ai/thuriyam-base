@@ -8,8 +8,7 @@ from campaigns.schema import CampaignCreate, CampaignUpdate, CampaignResponse
 from campaigns.model import Campaign
 from core.base.model import ModelBuilder
 from core.base.validator import Operation
-from core.security.auth import get_current_user
-from users.schema import User
+from core.security.auth import get_current_user, User
 
 router = APIRouter(prefix="/campaigns", tags=["campaigns"])
 

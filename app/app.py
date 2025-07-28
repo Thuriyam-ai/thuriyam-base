@@ -39,16 +39,13 @@ app.add_middleware(
 
 # Include API routes
 from todos.views import router as todos_router
-from users.views import router as users_router
 from campaigns.views import router as campaigns_router
 
 # Import modules to register validators
 import todos
-import users  
 import campaigns
 
 app.include_router(todos_router, prefix=config.API_PREFIX)
-app.include_router(users_router, prefix=f"{config.API_PREFIX}", tags=["users"])
 app.include_router(campaigns_router, prefix=config.API_PREFIX)
 
 # Add a simple root health check

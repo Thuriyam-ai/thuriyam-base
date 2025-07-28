@@ -24,7 +24,6 @@ from core.base.model import Base
 
 # Import all models to ensure they are registered with SQLAlchemy metadata
 # This is important for autogenerate to work properly
-import users.model
 import todos.model
 import campaigns.model
 

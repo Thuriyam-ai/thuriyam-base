@@ -3,10 +3,9 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from sqlalchemy.orm import Session
 from core.database import get_db
-from users.schema import User
-from users.repository import UserRepository
 from core.security.jwt import decode_token
 from core.settings import get_config
+import traceback
 
 settings = get_config()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -22,6 +21,10 @@ oauth2_scheme = OAuth2PasswordBearer(
         "campaigns:manage": "Full campaign management including status changes."
     }
 )
+
+class User:
+    def __init__(self, username: str):
+        self.username = username
 
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)
@@ -75,7 +78,6 @@ async def get_current_user(
                     headers={"WWW-Authenticate": authenticate_value},
                 )
     except Exception:
-        print(f"Exception: {Exception}")
         raise
     
     # Under the assumption that the authn is done, we do not need to fetch the user from the database

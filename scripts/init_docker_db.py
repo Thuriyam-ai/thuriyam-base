@@ -69,7 +69,6 @@ def init_docker_db(config):
         
         # Import all models to ensure they are registered with SQLAlchemy
         from todos.model import Todo  # Import todo model
-        from users.model import User  # Import user model
         
         # Check if tables already exist
         inspector = inspect(engine)

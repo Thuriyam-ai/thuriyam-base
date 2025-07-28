@@ -57,7 +57,6 @@ def init_db():
         # Import all models to ensure they are registered with SQLAlchemy
         # This ensures all models are imported and registered before creating tables
         from todos.model import Todo  # Import todo model
-        from users.model import User  # Import user model
         
         # Check if tables already exist
         inspector = inspect(engine)
