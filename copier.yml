@@ -38,16 +38,20 @@ author_name:
 author_email:
     type: str
     help: Author email
-    default: "contact@{{ org_name.lower() }}.com"
+    default: "contact@{{ org_name.lower() }}.ai"
 
-example_module_name:
+modules:
     type: str
-    help: Name for the example module (e.g., users, orders, products)
-    default: items
+    help: Comma-separated list of module names (e.g., users,products,orders)
+    default: users
     validator: >-
-        {% if not example_module_name.isidentifier() %}
-        Module name must be a valid Python identifier
+        {% set module_list = modules.split(',') %}
+        {% for module in module_list %}
+        {% set clean_module = module.strip() %}
+        {% if not clean_module.isidentifier() %}
+        Each module name must be a valid Python identifier: "{{ clean_module }}" is invalid
         {% endif %}
+        {% endfor %}
 
 use_postgres:
     type: bool
@@ -93,11 +97,104 @@ jwt_secret_key:
     default: "your-secret-key-change-in-production"
 
 _tasks:
-    # Post-generation tasks
+    # Rename base module template to first module name and replace placeholders
+    - command: |
+        {% set module_list = modules.split(',') %}
+        {% set first_module = module_list[0].strip() %}
+        if [ -d "app/_module_template" ]; then
+            mv "app/_module_template" "app/{{ first_module }}"
+            echo "Renamed base template to {{ first_module }}"
+            
+            # Calculate names for the first module
+            MODULE_NAME="{{ first_module }}"
+            if [[ "{{ first_module }}" == *s ]]; then
+                base_name="{{ first_module[:-1] }}"
+                CLASS_NAME=$(echo "$base_name" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+                SINGULAR_NAME="$base_name"
+                SINGULAR_VAR_NAME="$base_name"
+            else
+                CLASS_NAME=$(echo "{{ first_module }}" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+                SINGULAR_NAME="{{ first_module }}"
+                SINGULAR_VAR_NAME="{{ first_module }}"
+            fi
+            
+            # Replace placeholders in Python files for the first module
+            find "app/{{ first_module }}" -name "*.py" -type f -exec sed -i.bak \
+                -e "s/__MODULE_NAME__/$MODULE_NAME/g" \
+                -e "s/__CLASS_NAME__/$CLASS_NAME/g" \
+                -e "s/__SINGULAR_NAME__/$SINGULAR_NAME/g" \
+                -e "s/__SINGULAR_VAR_NAME__/$SINGULAR_VAR_NAME/g" \
+                {} \;
+                
+            # Clean up backup files
+            find "app/{{ first_module }}" -name "*.bak" -delete
+        fi
+    # Create additional module directories for multi-module setup  
+    - command: |
+        {% set module_list = modules.split(',') %}
+        {% if module_list|length > 1 %}
+        {% set first_module = module_list[0].strip() %}
+        {% for module in module_list[1:] %}
+        {% set clean_module = module.strip() %}
+        if [ -d "app/{{ first_module }}" ] && [ ! -d "app/{{ clean_module }}" ]; then
+            echo "Creating module: {{ clean_module }}"
+            cp -r "app/{{ first_module }}" "app/{{ clean_module }}"
+            
+            # Calculate names for replacement
+            MODULE_NAME="{{ clean_module }}"
+            if [[ "{{ clean_module }}" == *s ]]; then
+                base_name="{{ clean_module[:-1] }}"
+                CLASS_NAME=$(echo "$base_name" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+                SINGULAR_NAME="$base_name"
+                SINGULAR_VAR_NAME="$base_name"
+            else
+                CLASS_NAME=$(echo "{{ clean_module }}" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+                SINGULAR_NAME="{{ clean_module }}"
+                SINGULAR_VAR_NAME="{{ clean_module }}"
+            fi
+            
+            # Calculate names for the first module to replace
+            FIRST_MODULE_NAME="{{ first_module }}"
+            if [[ "{{ first_module }}" == *s ]]; then
+                first_base_name="{{ first_module[:-1] }}"
+                FIRST_CLASS_NAME=$(echo "$first_base_name" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+                FIRST_SINGULAR_NAME="$first_base_name"
+                FIRST_SINGULAR_VAR_NAME="$first_base_name"
+            else
+                FIRST_CLASS_NAME=$(echo "{{ first_module }}" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+                FIRST_SINGULAR_NAME="{{ first_module }}"
+                FIRST_SINGULAR_VAR_NAME="{{ first_module }}"
+            fi
+            
+            # Replace first module values with current module values (avoid replacing current_user)
+            find "app/{{ clean_module }}" -name "*.py" -type f -exec sed -i.bak \
+                -e "s/from $FIRST_MODULE_NAME\./from $MODULE_NAME./g" \
+                -e "s/\b$FIRST_MODULE_NAME\b/$MODULE_NAME/g" \
+                -e "s/\b$FIRST_CLASS_NAME\([A-Z]\)/$CLASS_NAME\1/g" \
+                -e "s/\b$FIRST_CLASS_NAME\b/$CLASS_NAME/g" \
+                -e "s/create_$FIRST_SINGULAR_VAR_NAME/create_$SINGULAR_VAR_NAME/g" \
+                -e "s/get_$FIRST_SINGULAR_VAR_NAME/get_$SINGULAR_VAR_NAME/g" \
+                -e "s/update_$FIRST_SINGULAR_VAR_NAME/update_$SINGULAR_VAR_NAME/g" \
+                -e "s/patch_$FIRST_SINGULAR_VAR_NAME/patch_$SINGULAR_VAR_NAME/g" \
+                -e "s/delete_$FIRST_SINGULAR_VAR_NAME/delete_$SINGULAR_VAR_NAME/g" \
+                -e "s/get_$FIRST_MODULE_NAME/get_$MODULE_NAME/g" \
+                -e "s/$FIRST_SINGULAR_VAR_NAME\_data/$SINGULAR_VAR_NAME\_data/g" \
+                -e "s/$FIRST_SINGULAR_VAR_NAME\_service/$SINGULAR_VAR_NAME\_service/g" \
+                -e "s/$FIRST_SINGULAR_VAR_NAME\_id/$SINGULAR_VAR_NAME\_id/g" \
+                {} \;
+                
+            # Clean up backup files
+            find "app/{{ clean_module }}" -name "*.bak" -delete
+        fi
+        {% endfor %}
+        {% endif %}
+      when: "{{ modules.split(',') | length > 1 }}"
+    # Standard post-generation tasks
     - command: "chmod +x scripts/*.sh"
       when: "{{ include_docker }}"
     - command: "chmod +x scripts/*.py"
     - command: "echo 'Microservice {{ project_name }} created successfully!'"
+    - command: "echo 'Generated modules: {{ modules }}'"
     - command: "echo 'Next steps:'"
     - command: "echo '1. cd {{ _copier_conf.dst_path }}'"
     - command: "echo '2. Review and update .env files'"

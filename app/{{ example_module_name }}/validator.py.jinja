@@ -1,7 +1,0 @@
-from pydantic import BaseModel, Field
-from typing import Optional
-
-class {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}CreateValidator(BaseModel):
-    title: str = Field(..., min_length=1, max_length=200)
-    description: Optional[str] = Field(default="", max_length=1000)
-    completed: bool = Field(default=False) 

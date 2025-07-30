@@ -83,7 +83,11 @@ def init_docker_db(config):
         logger.info("Creating database tables...")
         
         # Import all models to ensure they are registered with SQLAlchemy
-        from {{ example_module_name }}.model import {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}  # Import example model
+        {% set module_list = modules.split(',') -%}
+        {% for module in module_list -%}
+        {% set clean_module = module.strip() -%}
+        from {{ clean_module }}.model import {{ (clean_module[:-1] if clean_module.endswith('s') else clean_module) | title }}  # Import example model
+        {% endfor %}
         
         # Check if tables already exist
         inspector = inspect(engine)

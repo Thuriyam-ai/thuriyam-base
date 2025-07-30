@@ -29,7 +29,7 @@ You'll be prompted for various configuration options:
 - **version**: Initial version (default: "0.1.0")
 - **author_name**: Author name
 - **author_email**: Author email
-- **example_module_name**: Name for the example module (default: "items")
+- **modules**: Comma-separated list of module names (e.g., "users,products,orders"). Each module will have its own complete CRUD API with models, repositories, schemas, and views. (default: "items")
 - **use_postgres**: Use PostgreSQL instead of SQLite (default: true)
 - **database_name**: Database name (when using PostgreSQL)
 - **database_user**: Database user (when using PostgreSQL)
@@ -254,7 +254,7 @@ The template uses Jinja2 templating with these key variables:
 
 - `{{ project_name }}` - Project name
 - `{{ python_module_name }}` - Python module name (used for service names, but app code is in `app/` directory)
-- `{{ example_module_name }}` - Example module name
+- `{{ modules }}` - Comma-separated list of module names
 - `{{ org_name }}` - Organization name
 - `{{ service_description }}` - Service description
 - `{{ version }}` - Project version

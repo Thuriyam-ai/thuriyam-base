@@ -13,6 +13,7 @@ class BaseConfig(BaseSettings, extra="ignore"):
 
     ORG_NAME: str = "{{ org_name }}"
     APP_NAME: str = "{{ project_name.title() }} Service"
+    APP_DESCRIPTION: str = "{{ service_description }}"
     API_PREFIX: str = "{{ api_prefix }}"
     VERSION: str = "{{ version }}"
     DOCS_URL: Optional[str] = None

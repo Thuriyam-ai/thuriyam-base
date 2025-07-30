@@ -158,7 +158,12 @@ def create_tables():
         
         from core.database import engine
         from core.base.model import Base
-        from {{ example_module_name }}.model import {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}  # Import models
+        # Import models for table creation
+        {% set module_list = modules.split(',') -%}
+        {% for module in module_list -%}
+        {% set clean_module = module.strip() -%}
+        from {{ clean_module }}.model import {{ (clean_module[:-1] if clean_module.endswith('s') else clean_module) | title }}  # Import models
+        {% endfor %}
         
         Base.metadata.create_all(bind=engine)
         typer.echo("✅ Database tables created successfully")

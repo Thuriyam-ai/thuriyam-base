@@ -8,10 +8,7 @@ from applifespan import app_lifespan
 
 app = typer.Typer()
 
-COMMAND_MODULE_PATHS = [
-    "{{ example_module_name }}.management.commands",
-]
-
+COMMAND_MODULE_PATHS = []
 
 @app.command()
 def runserver(host: str = "127.0.0.1", port: int = 8000, reload: bool = True):
@@ -24,7 +21,6 @@ def runserver(host: str = "127.0.0.1", port: int = 8000, reload: bool = True):
         reload=reload,
         reload_excludes=[".venv/*"]
     )
-
 
 @app.command()
 def run_command(command: str, args: List[str] = typer.Option([])):
@@ -63,7 +59,6 @@ def run_command(command: str, args: List[str] = typer.Option([])):
             )
 
     asyncio.run(execute_command())
-
 
 if __name__ == "__main__":
     app() 

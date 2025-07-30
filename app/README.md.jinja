@@ -92,14 +92,21 @@ The API will be available at `http://localhost:8000`
 
 ## API Endpoints
 
-The service includes a complete CRUD API for `{{ example_module_name }}`:
+{% set module_list = modules.split(',') -%}
+{% for module in module_list -%}
+{% set clean_module = module.strip() -%}
+### {{ clean_module.title() }} Module
 
-- `GET /api/v1/{{ example_module_name }}` - List all {{ example_module_name }}
-- `POST /api/v1/{{ example_module_name }}` - Create a new {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}
-- `GET /api/v1/{{ example_module_name }}/{id}` - Get a specific {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}
-- `PUT /api/v1/{{ example_module_name }}/{id}` - Update a {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}
-- `PATCH /api/v1/{{ example_module_name }}/{id}/toggle` - Toggle {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} completion status
-- `DELETE /api/v1/{{ example_module_name }}/{id}` - Delete a {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}
+The service includes a complete CRUD API for `{{ clean_module }}`:
+
+- `GET /api/v1/{{ clean_module }}` - List all {{ clean_module }}
+- `POST /api/v1/{{ clean_module }}` - Create a new {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }}
+- `GET /api/v1/{{ clean_module }}/{id}` - Get a specific {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }}
+- `PUT /api/v1/{{ clean_module }}/{id}` - Update a {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }}
+- `PATCH /api/v1/{{ clean_module }}/{id}/toggle` - Toggle {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }} completion status
+- `DELETE /api/v1/{{ clean_module }}/{id}` - Delete a {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }}
+
+{% endfor %}
 
 ## Project Structure
 
@@ -113,12 +120,16 @@ The service includes a complete CRUD API for `{{ example_module_name }}`:
 │   ├── settings/          # Environment configurations
 │   ├── base/              # Base classes (Model, Repository, etc.)
 │   └── database.py        # Database configuration
-├── {{ example_module_name }}/              # Example module
+{% set module_list = modules.split(',') -%}
+{% for module in module_list -%}
+{% set clean_module = module.strip() -%}
+├── {{ clean_module }}/              # {{ clean_module.title() }} module
 │   ├── model.py           # Database model
 │   ├── schema.py          # Pydantic schemas
 │   ├── repository.py      # Data access layer
 │   ├── validator.py       # Input validation
 │   └── views.py           # API endpoints
+{% endfor %}
 {% if include_docker -%}
 ├── DockerfileLocal        # Local development Docker
 ├── DockerfileProd         # Production Docker

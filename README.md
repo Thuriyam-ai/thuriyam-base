@@ -17,6 +17,13 @@ This template creates a production-ready FastAPI microservice with:
 - **CORS middleware** configuration
 - **Health check endpoints**
 
+### 🏢 **Multi-Module Architecture**
+- **Multiple Business Domains**: Generate multiple modules (e.g., users, products, orders) in one service
+- **Complete CRUD APIs**: Each module gets full Create, Read, Update, Delete endpoints
+- **Automatic Integration**: All modules are automatically registered in the main application
+- **Database Schema Support**: Alembic migrations include all module models
+- **Consistent Structure**: Every module follows the same architectural patterns
+
 ### 🐳 **Docker & Infrastructure**
 - **Multi-stage Docker setup** (development & production)
 - **Docker Compose** with PostgreSQL, Redis, MongoDB, Kafka
@@ -58,13 +65,35 @@ copier copy https://github.com/pmundhra/thuriyam-base/ new-service
 
 Follow the interactive prompts to configure your service.
 
+### Multi-Module Example
+
+Generate a service with multiple business domains:
+
+```bash
+copier copy https://github.com/pmundhra/thuriyam-base/ user-management-service
+# When prompted for modules, enter: users,roles,permissions
+cd user-management-service
+```
+
+This creates a service with three complete modules:
+- **Users Module**: `/api/v1/users` endpoints for user management
+- **Roles Module**: `/api/v1/roles` endpoints for role management  
+- **Permissions Module**: `/api/v1/permissions` endpoints for permission management
+
+Each module includes:
+- Database model with SQLAlchemy
+- Pydantic schemas for validation
+- Repository for data access
+- Complete CRUD API endpoints
+- Input validators
+
 ### What You'll Be Asked
 
 - **Project name** (e.g., "user-service", "payment-service")
 - **Service description**
 - **Organization details**
 - **Database choice** (PostgreSQL or SQLite)
-- **Example module name** (e.g., "users", "orders", "products")
+- **Module names** (comma-separated list e.g., "users,roles,permissions" or single module "users")
 - **Optional features** (Docker, Alembic migrations)
 - **Authentication settings**
 

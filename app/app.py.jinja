@@ -5,8 +5,6 @@ from core import settings
 from core.settings.development import DevConfig
 from core.settings.production import ProdConfig
 from core.settings.docker import DockerConfig
-# from core.settings.staging import StagingConfig
-
 from applifespan import app_lifespan
 
 logger = logging.getLogger(__name__)
@@ -15,39 +13,53 @@ logger = logging.getLogger(__name__)
 settings.register("dev", DevConfig)
 settings.register("prod", ProdConfig)
 settings.register("docker", DockerConfig)
-# register("staging", StagingConfig)
 
 config = settings.get_config()
 
+# Import modules to register validators
+{% for module in module_list -%}
+{% set clean_module = module.strip() -%}
+import {{ clean_module }}
+{% endfor %}
+
 app = FastAPI(
-    title=config.ORG_NAME,
-    description="{{ service_description }}",
+    title=config.APP_NAME,
+    description=config.APP_DESCRIPTION,
     version=config.VERSION,
     docs_url=config.DOCS_URL,
     redoc_url=config.REDOC_URL,
     openapi_url="/openapi.json",
-    lifespan=app_lifespan
+    lifespan=app_lifespan,
 )
 
+# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=config.ALLOWED_HOSTS_REGEX,
+    allow_origins=config.ALLOWED_HOSTS_REGEX,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include API routes
-from {{ example_module_name }}.views import router as {{ example_module_name }}_router
+# Include all module routers
+{% set module_list = modules.split(',') -%}
+{% for module in module_list -%}
+{% set clean_module = module.strip() -%}
+from {{ clean_module }}.views import router as {{ clean_module }}_router
+{% endfor %}
 
-# Import modules to register validators
-import {{ example_module_name }}
-
-app.include_router({{ example_module_name }}_router, prefix=config.API_PREFIX)
+{% for module in module_list -%}
+{% set clean_module = module.strip() -%}
+app.include_router({{ clean_module }}_router, prefix=config.API_PREFIX)
+{% endfor %}
 
 # Add a simple root health check
-@app.get("/", summary="Health Check", description="Check if the service is running")
+@app.get("/")
 async def root():
+    return {"message": "{{ project_name }} is running!", "status": "healthy"}
+
+@app.get("/health")
+async def health_check():
     """
     Health check endpoint.
     
@@ -58,7 +70,7 @@ async def root():
     db_status = "healthy" if test_database_connection() else "unhealthy"
     
     return {
-        "message": "{{ org_name }} {{ project_name.title() }} Service is running", 
+        "message": "Thuriyam Base Template Service is running", 
         "status": "healthy",
         "database": db_status
-    } 
+    }
