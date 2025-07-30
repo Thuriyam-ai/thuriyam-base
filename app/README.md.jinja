@@ -1,0 +1,204 @@
+# {{ project_name.title() }}
+
+{{ service_description }}
+
+This microservice was generated from the Thuriyam Base Template, a FastAPI-based microservice template with comprehensive API documentation and best practices.
+
+## Features
+
+- ✅ FastAPI with automatic API documentation
+- ✅ SQLAlchemy ORM with {{ "PostgreSQL" if use_postgres else "SQLite" }} database
+{% if include_alembic -%}
+- ✅ Alembic for database migrations
+{% endif -%}
+- ✅ Pydantic for data validation
+- ✅ Repository pattern for data access
+- ✅ Model builder pattern with validation
+- ✅ Environment-based configuration
+- ✅ Comprehensive logging
+{% if include_docker -%}
+- ✅ Docker support for development and production
+{% endif -%}
+- ✅ JWT authentication support
+- ✅ CORS middleware
+- ✅ Health check endpoints
+
+## Quick Start
+
+### 1. Set up Python environment
+
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+### 2. Install dependencies
+
+```bash
+pip install -e .
+```
+
+### 3. Configure environment
+
+Copy the example environment file and update it:
+
+```bash
+cp env.example .env
+# Edit .env with your specific configuration
+```
+
+{% if use_postgres -%}
+### 4. Set up PostgreSQL database
+
+Create a PostgreSQL database:
+
+```sql
+CREATE DATABASE {{ database_name }};
+CREATE USER {{ database_user }} WITH PASSWORD '{{ database_password }}';
+GRANT ALL PRIVILEGES ON DATABASE {{ database_name }} TO {{ database_user }};
+```
+
+{% if include_alembic -%}
+### 5. Run database migrations
+
+```bash
+alembic upgrade head
+```
+{% endif -%}
+{% else -%}
+### 4. Database setup
+
+The service uses SQLite by default, which will create a local `{{ python_module_name }}.db` file automatically.
+
+{% if include_alembic -%}
+### 5. Run database migrations
+
+```bash
+alembic upgrade head
+```
+{% endif -%}
+{% endif -%}
+
+### {{ "6" if include_alembic else "5" }}. Start the development server
+
+```bash
+python main.py runserver
+```
+
+The API will be available at `http://localhost:8000`
+
+- API Documentation: `http://localhost:8000/docs`
+- Alternative docs: `http://localhost:8000/redoc`
+
+## API Endpoints
+
+The service includes a complete CRUD API for `{{ example_module_name }}`:
+
+- `GET /api/v1/{{ example_module_name }}` - List all {{ example_module_name }}
+- `POST /api/v1/{{ example_module_name }}` - Create a new {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}
+- `GET /api/v1/{{ example_module_name }}/{id}` - Get a specific {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}
+- `PUT /api/v1/{{ example_module_name }}/{id}` - Update a {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}
+- `PATCH /api/v1/{{ example_module_name }}/{id}/toggle` - Toggle {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} completion status
+- `DELETE /api/v1/{{ example_module_name }}/{id}` - Delete a {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}
+
+## Project Structure
+
+```
+{{ python_module_name }}/
+├── main.py                 # CLI entry point
+├── {{ python_module_name }}.py                  # FastAPI {{ python_module_name }}lication
+├── {{ python_module_name }}lifespan.py         # Application lifecycle management
+├── pyproject.toml         # Project configuration
+├── core/                  # Core infrastructure
+│   ├── settings/          # Environment configurations
+│   ├── base/              # Base classes (Model, Repository, etc.)
+│   └── database.py        # Database configuration
+├── {{ example_module_name }}/              # Example module
+│   ├── model.py           # Database model
+│   ├── schema.py          # Pydantic schemas
+│   ├── repository.py      # Data access layer
+│   ├── validator.py       # Input validation
+│   └── views.py           # API endpoints
+{% if include_docker -%}
+├── DockerfileLocal        # Local development Docker
+├── DockerfileProd         # Production Docker
+{% endif -%}
+{% if include_alembic -%}
+├── alembic.ini           # Alembic configuration
+└── alembic/              # Database migrations
+    └── versions/         # Migration files
+{% endif -%}
+```
+
+## Development
+
+### Adding new modules
+
+1. Create a new directory under the project root
+2. Add the standard files: `model.py`, `schema.py`, `repository.py`, `validator.py`, `views.py`, `__init__.py`
+3. Register the module in `{{ python_module_name }}.py`
+4. Register validators in the module's `__init__.py`
+
+### Environment configurations
+
+- `dev` - Development (default)
+- `prod` - Production
+- `docker` - Docker environment
+
+Set the `FLAVOUR` environment variable to switch between configurations.
+
+{% if include_docker -%}
+### Docker
+
+For local development:
+```bash
+docker build -f DockerfileLocal -t {{ project_name }}-dev .
+docker run -p 8000:8000 {{ project_name }}-dev
+```
+
+For production:
+```bash
+docker build -f DockerfileProd -t {{ project_name }}-prod .
+docker run -p 8000:8000 {{ project_name }}-prod
+```
+{% endif -%}
+
+{% if include_alembic -%}
+### Database migrations
+
+Create a new migration:
+```bash
+alembic revision --autogenerate -m "Description of changes"
+```
+
+Apply migrations:
+```bash
+alembic upgrade head
+```
+
+Rollback migrations:
+```bash
+alembic downgrade -1
+```
+{% endif -%}
+
+## Configuration
+
+Key environment variables:
+
+- `FLAVOUR` - Environment flavor (dev/prod/docker)
+- `SQLALCHEMY_DATABASE_URL` - Database connection string
+- `SECRET_KEY` - JWT secret key
+- `STATSD_HOST` - StatsD server host (optional)
+- `STATSD_PORT` - StatsD server port (optional)
+
+## Contributing
+
+1. Follow the existing code patterns
+2. Add proper validation and error handling
+3. Update documentation for new features
+4. Ensure tests pass before submitting
+
+## License
+
+Created from {{ org_name }} Base Template 

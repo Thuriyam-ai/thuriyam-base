@@ -1,0 +1,27 @@
+from pydantic import BaseModel, Field
+from typing import Optional
+from datetime import datetime
+
+class {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}Base(BaseModel):
+    title: str = Field(..., description="The title of the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item", min_length=1, max_length=200)
+    description: Optional[str] = Field(default="", description="Optional description of the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item", max_length=1000)
+    completed: bool = Field(default=False, description="Whether the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item is completed")
+
+class {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}Create({{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}Base):
+    """Schema for creating a new {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item"""
+    pass
+
+class {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}Update(BaseModel):
+    """Schema for updating a {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item (all fields are optional)"""
+    title: Optional[str] = Field(None, description="The title of the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item", min_length=1, max_length=200)
+    description: Optional[str] = Field(None, description="Optional description of the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item", max_length=1000)
+    completed: Optional[bool] = Field(None, description="Whether the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item is completed")
+
+class {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}Response({{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}Base):
+    """Schema for {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item responses"""
+    id: str = Field(..., description="Unique identifier for the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} item")
+    created_at: datetime = Field(..., description="Timestamp when the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} was created")
+    updated_at: datetime = Field(..., description="Timestamp when the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} was last updated")
+
+    class Config:
+        from_attributes = True 

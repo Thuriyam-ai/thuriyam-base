@@ -1,0 +1,91 @@
+from typing import Any, Dict, Optional
+from pydantic import Field
+from pydantic_settings import BaseSettings
+from uvicorn.logging import DefaultFormatter
+from decouple import config
+
+
+class BaseConfig(BaseSettings, extra="ignore"):
+    """Base configuration"""
+
+    FLAVOUR: str = Field(default="dev", env="FLAVOUR")
+    DEBUG: bool = False
+
+    ORG_NAME: str = "{{ org_name }}"
+    APP_NAME: str = "{{ project_name.title() }} Service"
+    API_PREFIX: str = "{{ api_prefix }}"
+    VERSION: str = "{{ version }}"
+    DOCS_URL: Optional[str] = None
+    REDOC_URL: Optional[str] = None
+    ALLOWED_HOSTS: Optional[list] = None
+
+    # Database
+    {% if use_postgres -%}
+    SQLALCHEMY_DATABASE_URL: str = config("SQLALCHEMY_DATABASE_URL", default="postgresql://{{ database_user }}:{{ database_password }}@localhost:5432/{{ database_name }}")
+    {% else -%}
+    SQLALCHEMY_DATABASE_URL: str = config("SQLALCHEMY_DATABASE_URL", default="sqlite:///{{ python_module_name }}.db")
+    {% endif -%}
+    
+    # CORS
+    ALLOWED_HOSTS_REGEX: str = r"^http://.*\.{{ org_name.lower() }}\.local$|^https://.*\.{{ org_name.lower() }}\.in$"
+
+    # Common Org Headers
+    ORG_SHARED_REQUEST_HEADERS: Dict[str, str] = {
+        "x-internal-communication-token": "TTbVBDmZ59d4xXLC",
+        "User-Agent": f"{ORG_NAME}-servers",
+    }
+    
+    # JWT
+    SECRET_KEY: str = config("SECRET_KEY", default="{{ jwt_secret_key }}")
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # StatsD Configuration (with defaults for local development)
+    STATSD_HOST: str = config("STATSD_HOST", default="localhost")
+    STATSD_PORT: int = config("STATSD_PORT", default=8125, cast=int)
+    STATSD_SERVICE_NAME: str = config("STATSD_SERVICE_NAME", default="{{ python_module_name }}")
+    STATSD_PREFIX: str = config("STATSD_PREFIX", default="{{ python_module_name }}")
+
+    LOGGING_CONFIG: Dict[str, Any] = {
+        "version": 1,
+        "disable_existing_loggers": False,
+        "formatters": {
+            "standard": {
+                "()": DefaultFormatter,  # Use Uvicorn's DefaultFormatter to keep colors
+                "fmt": "%(levelprefix)s %(name)s: %(message)s",
+                "datefmt": "%Y-%m-%d %H:%M:%S",
+            },
+        },
+        "handlers": {
+            "console": {
+                "level": "DEBUG",
+                "class": "logging.StreamHandler",
+                "formatter": "standard",
+            },
+        },
+        "loggers": {
+            "uvicorn": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": False,
+            },
+            "{{ python_module_name }}": {
+                "handlers": ["console"],
+                "level": "INFO",
+                "propagate": False,
+            },
+        },
+        "root": {
+            "handlers": ["console"],
+            "level": "INFO",
+        },
+    }
+
+    API_KEY: Dict[str, str] = {
+        "DEFAULT": "26dbf0a5-e986-406e-bcd7-234835b68c77",
+    }
+
+    API_KEY_HEADER: str = "X-API-Key"
+
+    class Config:
+        env_prefix = "APP_" 

@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# {{ project_name.title() }} Docker Setup Script
+# This script sets up the Docker environment with PostgreSQL
+
+set -e
+
+echo "🐳 Setting up {{ project_name.title() }} Docker Environment..."
+
+# Check if Docker is running
+if ! docker info > /dev/null 2>&1; then
+    echo "❌ Docker is not running. Please start Docker and try again."
+    exit 1
+fi
+
+# Check if docker-compose is available
+if ! command -v docker-compose &> /dev/null; then
+    echo "❌ docker-compose is not installed. Please install it and try again."
+    exit 1
+fi
+
+# Navigate to build directory
+cd "$(dirname "$0")/../build"
+
+echo "📦 Starting Docker services..."
+docker-compose up -d
+
+echo "⏳ Waiting for services to be ready..."
+sleep 10
+
+{% if use_postgres -%}
+# Check if PostgreSQL is ready
+echo "🔍 Checking PostgreSQL connection..."
+if docker-compose exec -T postgres pg_isready -U {{ database_user }} -d {{ database_name }}; then
+    echo "✅ PostgreSQL is ready!"
+    
+    # Check if database exists, create if it doesn't
+    echo "🔍 Checking if database exists..."
+    db_exists=$(docker-compose exec -T postgres psql -U {{ database_user }} -lqt | cut -d \| -f 1 | grep -qw {{ database_name }} || echo "not_found")
+    
+    if [ "$db_exists" = "not_found" ]; then
+        echo "📊 Database '{{ database_name }}' not found. Creating database..."
+        docker-compose exec -T postgres createdb -U {{ database_user }} {{ database_name }}
+        echo "✅ Database '{{ database_name }}' created successfully!"
+    else
+        echo "✅ Database '{{ database_name }}' already exists"
+    fi
+    
+    # Check if tables exist
+    echo "🔍 Checking if database tables exist..."
+    table_count=$(docker-compose exec -T postgres psql -U {{ database_user }} -d {{ database_name }} -t -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'public';" | tr -d ' ')
+    
+    if [ "$table_count" -eq 0 ]; then
+        echo "📊 No tables found. Database will be initialized on first application start."
+        {% if include_alembic -%}
+        echo "💡 To run migrations manually, use: cd ../app && python -m alembic upgrade head"
+        {% endif -%}
+    else
+        echo "✅ Found $table_count existing tables"
+    fi
+else
+    echo "❌ Failed to connect to PostgreSQL"
+    echo "🔍 Checking PostgreSQL logs..."
+    docker-compose logs postgres
+    exit 1
+fi
+{% else -%}
+echo "✅ Using SQLite database - no setup required"
+{% endif -%}
+
+# Check if the application is responding
+echo "🔍 Checking application health..."
+sleep 5
+
+if curl -f http://localhost:8000/ > /dev/null 2>&1; then
+    echo "✅ Application is running and healthy!"
+else
+    echo "⚠️  Application may still be starting up..."
+    echo "🔍 Checking application logs..."
+    docker-compose logs --tail=20 {{ project_name }}
+fi
+
+echo ""
+echo "🎉 Docker environment setup complete!"
+echo ""
+echo "📱 Services are running:"
+echo "  • Application: http://localhost:8000"
+echo "  • API Documentation: http://localhost:8000/docs"
+{% if use_postgres -%}
+echo "  • PostgreSQL: localhost:5432"
+{% endif -%}
+echo "  • Redis: localhost:6379"
+echo "  • MongoDB: localhost:27017"
+echo "  • Kafka: localhost:9092"
+echo "  • StatsD: localhost:9125"
+echo ""
+echo "🛠️  Useful commands:"
+echo "  • View logs: docker-compose logs -f {{ project_name }}"
+echo "  • Stop services: docker-compose down"
+echo "  • Restart app: docker-compose restart {{ project_name }}"
+{% if include_alembic -%}
+echo "  • Run migrations: cd ../app && python -m alembic upgrade head"
+{% endif -%}
+echo "" 

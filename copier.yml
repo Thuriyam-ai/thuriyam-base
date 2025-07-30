@@ -1,0 +1,109 @@
+_templates_suffix: .jinja
+_envops:
+    block_start_string: "{%"
+    block_end_string: "%}"
+    variable_start_string: "{{"
+    variable_end_string: "}}"
+
+project_name:
+    type: str
+    help: What is the name of your microservice? (e.g., user-service, payment-service)
+    placeholder: my-service
+
+service_description:
+    type: str
+    help: Brief description of what this service does
+    default: A FastAPI-based microservice
+
+python_module_name:
+    type: str
+    help: Python module name (snake_case version of project name)
+    default: "{{ project_name.replace('-', '_').replace(' ', '_').lower() }}"
+
+org_name:
+    type: str
+    help: Organization name
+    default: Thuriyam
+
+version:
+    type: str
+    help: Initial version
+    default: "0.1.0"
+
+author_name:
+    type: str
+    help: Author name
+    default: "{{ org_name }}"
+
+author_email:
+    type: str
+    help: Author email
+    default: "contact@{{ org_name.lower() }}.com"
+
+example_module_name:
+    type: str
+    help: Name for the example module (e.g., users, orders, products)
+    default: items
+    validator: >-
+        {% if not example_module_name.isidentifier() %}
+        Module name must be a valid Python identifier
+        {% endif %}
+
+use_postgres:
+    type: bool
+    help: Use PostgreSQL instead of SQLite?
+    default: true
+
+database_name:
+    type: str
+    help: Database name
+    default: "{{ python_module_name }}_db"
+    when: "{{ use_postgres }}"
+
+database_user:
+    type: str
+    help: Database user
+    default: "{{ org_name | lower }}_user"
+    when: "{{ use_postgres }}"
+
+database_password:
+    type: str
+    help: Database password
+    default: "{{ org_name | lower }}_password"
+    when: "{{ use_postgres }}"
+
+include_docker:
+    type: bool
+    help: Include Docker configuration files?
+    default: true
+
+include_alembic:
+    type: bool
+    help: Include Alembic for database migrations?
+    default: true
+
+api_prefix:
+    type: str
+    help: API prefix path
+    default: "/api/v1"
+
+jwt_secret_key:
+    type: str
+    help: JWT secret key for authentication
+    default: "your-secret-key-change-in-production"
+
+_tasks:
+    # Post-generation tasks
+    - command: "chmod +x scripts/*.sh"
+      when: "{{ include_docker }}"
+    - command: "chmod +x scripts/*.py"
+    - command: "echo 'Microservice {{ project_name }} created successfully!'"
+    - command: "echo 'Next steps:'"
+    - command: "echo '1. cd {{ _copier_conf.dst_path }}'"
+    - command: "echo '2. Review and update .env files'"
+    - command: "echo '3. Run: python -m venv venv && source venv/bin/activate'"
+    - command: "echo '4. Run: pip install -e .'"
+    - command: "echo '5. Run database migrations if using PostgreSQL'"
+    - command: "echo '6. Start development: python main.py runserver'"
+    - command: "echo 'Or use Docker: cd build && docker-compose up -d'" 
+      when: "{{ include_docker }}" 

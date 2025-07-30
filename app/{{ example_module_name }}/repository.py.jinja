@@ -1,0 +1,59 @@
+from typing import List, Optional
+from sqlalchemy.orm import Session
+from core.base.repository import BaseRepository
+from {{ example_module_name }}.model import {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}
+
+class {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}Repository(BaseRepository[{{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}]):
+    def __init__(self, db: Session):
+        super().__init__(db, {{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }})
+    
+    def find_by_completed(self, completed: bool, skip: int = 0, limit: int = 100) -> List[{{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}]:
+        """
+        Find {{ example_module_name }} by completion status with pagination.
+        
+        Args:
+            completed: Filter by completion status
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            
+        Returns:
+            List[{{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}]: List of {{ example_module_name }} matching the criteria
+        """
+        return self.db.query(self.model).filter(
+            self.model.completed == completed
+        ).offset(skip).limit(limit).all()
+    
+    def find_by_title_contains(self, title: str, skip: int = 0, limit: int = 100) -> List[{{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}]:
+        """
+        Find {{ example_module_name }} by title containing the given string.
+        
+        Args:
+            title: String to search for in title
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            
+        Returns:
+            List[{{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}]: List of {{ example_module_name }} matching the criteria
+        """
+        return self.db.query(self.model).filter(
+            self.model.title.contains(title)
+        ).offset(skip).limit(limit).all()
+    
+    def toggle_completed(self, id: str) -> Optional[{{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}]:
+        """
+        Toggle the completed status of a {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}.
+        
+        Args:
+            id: The ID of the {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} to toggle
+            
+        Returns:
+            Optional[{{ (example_module_name[:-1] if example_module_name.endswith('s') else example_module_name) | title }}]: The updated {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} or None if not found
+        """
+        {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} = self.find(id)
+        if not {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}:
+            return None
+        
+        {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}.completed = not {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }}.completed
+        self.db.commit()
+        self.db.refresh({{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }})
+        return {{ example_module_name[:-1] if example_module_name.endswith('s') else example_module_name }} 
