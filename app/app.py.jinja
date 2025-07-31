@@ -17,9 +17,8 @@ settings.register("docker", DockerConfig)
 config = settings.get_config()
 
 # Import modules to register validators
-{% for module in module_list -%}
-{% set clean_module = module.strip() -%}
-import {{ clean_module }}
+{% for entity in entities -%}
+import {{ entity }}
 {% endfor %}
 
 app = FastAPI(
@@ -42,15 +41,12 @@ app.add_middleware(
 )
 
 # Include all module routers
-{% set module_list = modules.split(',') -%}
-{% for module in module_list -%}
-{% set clean_module = module.strip() -%}
-from {{ clean_module }}.views import router as {{ clean_module }}_router
+{% for entity in entities -%}
+from {{ entity }}.views import router as {{ entity }}_router
 {% endfor %}
 
-{% for module in module_list -%}
-{% set clean_module = module.strip() -%}
-app.include_router({{ clean_module }}_router, prefix=config.API_PREFIX)
+{% for entity in entities -%}
+app.include_router({{ entity }}_router, prefix=config.API_PREFIX)
 {% endfor %}
 
 # Add a simple root health check

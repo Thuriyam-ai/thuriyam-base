@@ -92,19 +92,17 @@ The API will be available at `http://localhost:8000`
 
 ## API Endpoints
 
-{% set module_list = modules.split(',') -%}
-{% for module in module_list -%}
-{% set clean_module = module.strip() -%}
-### {{ clean_module.title() }} Module
+{% for entity in entities -%}
+### {{ entity.title() }} Module
 
-The service includes a complete CRUD API for `{{ clean_module }}`:
+The service includes a complete CRUD API for `{{ entity }}`:
 
-- `GET /api/v1/{{ clean_module }}` - List all {{ clean_module }}
-- `POST /api/v1/{{ clean_module }}` - Create a new {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }}
-- `GET /api/v1/{{ clean_module }}/{id}` - Get a specific {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }}
-- `PUT /api/v1/{{ clean_module }}/{id}` - Update a {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }}
-- `PATCH /api/v1/{{ clean_module }}/{id}/toggle` - Toggle {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }} completion status
-- `DELETE /api/v1/{{ clean_module }}/{id}` - Delete a {{ clean_module[:-1] if clean_module.endswith('s') else clean_module }}
+- `GET /api/v1/{{ entity }}` - List all {{ entity }}
+- `POST /api/v1/{{ entity }}` - Create a new {{ entity[:-1] if entity.endswith('s') else entity }}
+- `GET /api/v1/{{ entity }}/{id}` - Get a specific {{ entity[:-1] if entity.endswith('s') else entity }}
+- `PUT /api/v1/{{ entity }}/{id}` - Update a {{ entity[:-1] if entity.endswith('s') else entity }}
+- `PATCH /api/v1/{{ entity }}/{id}/toggle` - Toggle {{ entity[:-1] if entity.endswith('s') else entity }} completion status
+- `DELETE /api/v1/{{ entity }}/{id}` - Delete a {{ entity[:-1] if entity.endswith('s') else entity }}
 
 {% endfor %}
 
@@ -120,10 +118,8 @@ The service includes a complete CRUD API for `{{ clean_module }}`:
 │   ├── settings/          # Environment configurations
 │   ├── base/              # Base classes (Model, Repository, etc.)
 │   └── database.py        # Database configuration
-{% set module_list = modules.split(',') -%}
-{% for module in module_list -%}
-{% set clean_module = module.strip() -%}
-├── {{ clean_module }}/              # {{ clean_module.title() }} module
+{% for entity in entities -%}
+├── {{ entity }}/              # {{ entity.title() }} module
 │   ├── model.py           # Database model
 │   ├── schema.py          # Pydantic schemas
 │   ├── repository.py      # Data access layer
@@ -146,7 +142,7 @@ The service includes a complete CRUD API for `{{ clean_module }}`:
 ### Adding new modules
 
 1. Create a new directory under the project root
-2. Add the standard files: `model.py`, `schema.py`, `repository.py`, `validator.py`, `views.py`, `__init__.py`
+2. Add the standard files: `model.py`, `schema.py`, `repository.py`, `service.py`, `validator.py`, `views.py`, `__init__.py`
 3. Register the module in `{{ python_module_name }}.py`
 4. Register validators in the module's `__init__.py`
 

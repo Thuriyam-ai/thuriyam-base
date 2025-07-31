@@ -1,0 +1,8 @@
+# Module initialization
+from core.base.validator import BaseValidator, Operation
+from {{ entity }}.model import {{ entity.title() }}
+from {{ entity }}.validator import {{ entity.title() }}CreateValidator
+
+# Register validators
+validator_instance = BaseValidator.get_instance()
+validator_instance.register({{ entity.title() }}, Operation.CREATE, {{ entity.title() }}CreateValidator)

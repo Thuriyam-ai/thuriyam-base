@@ -53,7 +53,8 @@ if docker-compose exec -T postgres pg_isready -U {{ database_user }} -d {{ datab
     if [ "$table_count" -eq 0 ]; then
         echo "📊 No tables found. Database will be initialized on first application start."
         {% if include_alembic -%}
-        echo "💡 To run migrations manually, use: cd ../app && python -m alembic upgrade head"
+        docker compose exec -T {{ project_name }} alembic upgrade head
+        echo "✅ Database '{{ project_name }}' migrations applied successfully!"
         {% endif -%}
     else
         echo "✅ Found $table_count existing tables"
@@ -99,6 +100,7 @@ echo "  • View logs: docker-compose logs -f {{ project_name }}"
 echo "  • Stop services: docker-compose down"
 echo "  • Restart app: docker-compose restart {{ project_name }}"
 {% if include_alembic -%}
-echo "  • Run migrations: cd ../app && python -m alembic upgrade head"
+echo "  • Run migrations: docker compose exec -T {{ project_name }} alembic upgrade head"
+echo "  • Add new migrations: docker compose exec -T {{ project_name }} alembic revision --autogenerate -m 'Initial Service Migration'"
 {% endif -%}
 echo "" 

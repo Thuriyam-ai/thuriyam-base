@@ -46,16 +46,13 @@ async def get___MODULE_NAME__(
     
     Returns a list of __SINGULAR_NAME__ items matching the criteria.
     """
-    if completed is not None:
-        return repo.find_by_completed(completed, skip, limit)
-    elif title:
-        return repo.find_by_title_contains(title, skip, limit)
-    else:
-        return repo.find_all(skip, limit)
+    return __SINGULAR_VAR_NAME___service.list(skip, limit)
 
 @router.get("/{{ '{' }}__SINGULAR_VAR_NAME___id{{ '}' }}", response_model=__CLASS_NAME__Response, summary="Get a specific __SINGULAR_NAME__", description="Retrieve a specific __SINGULAR_NAME__ by its ID")
 async def get___SINGULAR_VAR_NAME__(
-    __SINGULAR_VAR_NAME___id: str
+    __SINGULAR_VAR_NAME___id: str,
+    __SINGULAR_VAR_NAME___service: __CLASS_NAME__Service = Depends(__CLASS_NAME__Service),
+    current_user: User = Security(get_current_user, scopes=["admin"]), # TODO: Add appropriate scopes for the operation
 ):
     """
     Get a specific __SINGULAR_NAME__ by ID.
@@ -64,7 +61,7 @@ async def get___SINGULAR_VAR_NAME__(
     
     Returns the __SINGULAR_NAME__ item if found, otherwise returns 404.
     """
-    __SINGULAR_VAR_NAME__ = repo.find(__SINGULAR_VAR_NAME___id)
+    __SINGULAR_VAR_NAME__ = __SINGULAR_VAR_NAME___service.get(__SINGULAR_VAR_NAME___id)
     if not __SINGULAR_VAR_NAME__:
         raise HTTPException(status_code=404, detail="__CLASS_NAME__ not found")
     return __SINGULAR_VAR_NAME__
