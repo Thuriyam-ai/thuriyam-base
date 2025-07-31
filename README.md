@@ -1,344 +1,345 @@
-# Thuriyam Base Template
+# Thuriyam Microservice Template
 
-A FastAPI-based microservice template with MongoDB, Redis, and SQLite support.
+A comprehensive [Copier](https://github.com/copier-org/copier) template for generating FastAPI-based microservices with all the infrastructure and best practices from the Thuriyam architecture.
 
-## Features
+## What This Template Generates
 
-- FastAPI web framework
-- SQLAlchemy ORM with SQLite database
-- MongoDB integration with Motor async driver
-- Redis caching support
-- JWT authentication
-- API key authentication
-- Comprehensive logging and monitoring
-- Docker support for development and production
+This template creates a production-ready FastAPI microservice with:
 
-## Directory Structure
+### 🚀 **Core Features**
+- **FastAPI** application with automatic OpenAPI documentation
+- **SQLAlchemy ORM** with PostgreSQL or SQLite support
+- **Pydantic** schemas for data validation
+- **Repository pattern** for clean data access layer
+- **Model builder pattern** with comprehensive validation
+- **Environment-based configuration** (dev/prod/docker)
+- **JWT authentication** support
+- **CORS middleware** configuration
+- **Health check endpoints**
 
-```
-.
-├── app/                    # FastAPI Application
-│   ├── core/              # Core modules (auth, database, settings)
-│   ├── todos/             # Todo module (example implementation)
-│   ├── app.py            # FastAPI application
-│   ├── main.py           # CLI entry point
-│   └── applifespan.py    # Application lifecycle management
-├── scripts/               # Database initialization scripts
-├── test/                  # Postman collections and test files
-├── pyproject.toml         # Python project configuration and dependencies
-├── DockerfileLocal        # Development Docker configuration
-├── DockerfileProd         # Production Docker configuration
-├── DockerfileStag         # Staging Docker configuration
-└── Makefile              # Build and deployment commands
-```
+### 🏢 **Multi-Module Architecture**
+- **Multiple Business Domains**: Generate multiple modules (e.g., users, products, orders) in one service
+- **Complete CRUD APIs**: Each module gets full Create, Read, Update, Delete endpoints
+- **Automatic Integration**: All modules are automatically registered in the main application
+- **Database Schema Support**: Alembic migrations include all module models
+- **Consistent Structure**: Every module follows the same architectural patterns
 
-## Prerequisites
+### 🐳 **Docker & Infrastructure**
+- **Multi-stage Docker setup** (development & production)
+- **Docker Compose** with PostgreSQL, Redis, MongoDB, Kafka
+- **Development hot-reload** with volume mounting
+- **Production-optimized** containers
 
-- Python 3.11
-- uv (Ultra-fast Python package manager)
-- SQLite (included with Python)
-- Redis (optional, for caching)
-- MongoDB (optional, for NoSQL data)
+### 🛠 **Development Tools**
+- **Database migrations** with Alembic
+- **Management scripts** for common tasks
+- **Database initialization** scripts
+- **Testing utilities**
+- **Environment setup** scripts
 
-## Installation
+### 📊 **Monitoring & Observability**
+- **StatsD integration** for metrics
+- **Comprehensive logging** configuration
+- **Health check endpoints**
+- **Service adapters** for external systems
 
-### 1. Clone the Repository
+## Quick Start
 
-```bash
-git clone <repository-url>
-cd thuriyam-base-template
-```
+### Prerequisites
 
-### 2. Install uv
+- Python 3.11+
+- [Copier](https://github.com/copier-org/copier)
+- Docker & Docker Compose (optional but recommended)
 
-```bash
-# Install uv (if not already installed)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Or with homebrew on macOS
-brew install uv
-
-# Or with pip
-pip install uv
-```
-
-### 3. Install Dependencies
+### Install Copier
 
 ```bash
-# Install base dependencies
-uv pip install -e .
-
-# For development, also install development dependencies
-uv pip install -e ".[dev]"
-
-# Alternative: Install specific environment dependencies
-uv pip install -e ".[production]"  # For production
-uv pip install -e ".[staging]"     # For staging
+pip install copier
 ```
 
-**Why uv?**
-- **10-100x faster** than pip for package installation
-- **Better dependency resolution** and conflict detection
-- **Compatible** with existing pip workflows
-- **Lockfile support** for reproducible builds
-
-**Optional: Using uv with Virtual Environments**
-```bash
-# Create and activate a virtual environment with uv
-uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies in the virtual environment
-uv pip install -e ".[dev]"
-```
-
-## Database Setup
-
-### Initialize SQLite Database
-
-The application uses SQLite by default. Initialize the database with the required tables:
+### Generate a New Microservice
 
 ```bash
-# From the app directory
-cd app
-python ../scripts/init_db.py
+copier copy https://github.com/pmundhra/thuriyam-base/ new-service
 ```
 
-This will:
-- Create the SQLite database file (`app/thuriyam.db`)
-- Create all necessary tables (including `todos` table)
-- Set up the database schema
+Follow the interactive prompts to configure your service.
 
-**Important**: Make sure to run this from the app directory to ensure the database is created in the correct location where the FastAPI application expects it.
+### Multi-Module Example
 
-## Running the Application
-
-### Development Mode
+Generate a service with multiple business domains:
 
 ```bash
-# From the project root directory
-cd app
-python -m uvicorn app:app --host 127.0.0.1 --port 8000 --reload
+copier copy https://github.com/pmundhra/thuriyam-base/ user-management-service
+# When prompted for modules, enter: users,roles,permissions
+cd user-management-service
 ```
 
-### Using the CLI
+This creates a service with three complete modules:
+- **Users Module**: `/api/v1/users` endpoints for user management
+- **Roles Module**: `/api/v1/roles` endpoints for role management  
+- **Permissions Module**: `/api/v1/permissions` endpoints for permission management
 
+Each module includes:
+- Database model with SQLAlchemy
+- Pydantic schemas for validation
+- Repository for data access
+- Complete CRUD API endpoints
+- Input validators
+
+### What You'll Be Asked
+
+- **Project name** (e.g., "user-service", "payment-service")
+- **Service description**
+- **Organization details**
+- **Database choice** (PostgreSQL or SQLite)
+- **Module names** (comma-separated list e.g., "users,roles,permissions" or single module "users")
+- **Optional features** (Docker, Alembic migrations)
+- **Authentication settings**
+
+## Generated Project Structure
+
+```
+new-service/
+├── build/                     # Docker infrastructure
+│   ├── docker-compose.yml    # Multi-service Docker setup
+│   ├── docker.env           # Docker environment variables
+│   └── README.md            # Docker setup documentation
+├── scripts/                   # Utility scripts
+│   ├── setup_docker.sh      # Docker environment setup
+│   ├── manage_db.py         # Database management
+│   ├── init_docker_db.py    # Docker DB initialization
+│   ├── test_db_connection.py # Connection testing
+│   └── generate-jwt-30-mins.py # JWT token generation
+├── my_new_service/           # Main application code
+│   ├── main.py              # CLI entry point
+│   ├── app.py               # FastAPI application
+│   ├── core/                # Core infrastructure
+│   ├── example_module/      # Generated example module
+│   ├── DockerfileLocal      # Development container
+│   └── DockerfileProd       # Production container
+├── README.md                 # Project documentation
+└── env.example              # Environment variables template
+```
+
+## Development Workflow
+
+After generating your service:
+
+### 1. Set up environment
 ```bash
-# From the project root directory
-cd app
-python main.py runserver --host 127.0.0.1 --port 8000 --reload
+cd my-new-service
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -e .
 ```
 
-### Production Mode
-
+### 2. Configure environment
 ```bash
-# From the project root directory
-cd app
-python -m uvicorn app:app --host 0.0.0.0 --port 8000
+cp env.example .env
+# Edit .env with your settings
 ```
 
-## API Endpoints
+### 3. Start development
 
-Once the application is running, you can access:
-
-- **Health Check**: `GET http://localhost:8000/`
-- **API Documentation**: `GET http://localhost:8000/docs`
-- **ReDoc Documentation**: `GET http://localhost:8000/redoc`
-
-### Todo API Endpoints
-
-- **Get all todos**: `GET http://localhost:8000/api/v1/todos`
-- **Create todo**: `POST http://localhost:8000/api/v1/todos`
-- **Get specific todo**: `GET http://localhost:8000/api/v1/todos/{todo_id}`
-- **Update todo**: `PUT http://localhost:8000/api/v1/todos/{todo_id}`
-- **Toggle todo**: `PATCH http://localhost:8000/api/v1/todos/{todo_id}/toggle`
-- **Delete todo**: `DELETE http://localhost:8000/api/v1/todos/{todo_id}`
-
-## Configuration
-
-The application uses environment-based configuration:
-
-- **Development**: Uses `DevConfig` from `app/core/settings/development.py`
-- **Production**: Uses `ProdConfig` from `app/core/settings/production.py`
-
-### Environment Variables
-
-Set the `FLAVOUR` environment variable to switch configurations:
-
+**Option A: Local development (SQLite)**
 ```bash
-export FLAVOUR=dev  # For development
-export FLAVOUR=prod # For production
+python main.py runserver
 ```
 
-### Database Configuration
-
-The default SQLite database URL is: `sqlite:///./thuriyam.db`
-
-You can override this by setting the `SQLALCHEMY_DATABASE_URL` environment variable:
-
-```bash
-export SQLALCHEMY_DATABASE_URL="sqlite:///./my_database.db"
-```
-
-## Docker Support
-
-### Local Development (SQLite)
-
-For local development, the application uses SQLite by default:
-
-```bash
-docker build -f DockerfileLocal -t thuriyam-dev .
-docker run -p 8000:8000 thuriyam-dev
-```
-
-### Docker Environment (PostgreSQL)
-
-For a complete Docker environment with PostgreSQL, Redis, MongoDB, and Kafka:
-
+**Option B: Full Docker environment**
 ```bash
 cd build
 docker-compose up -d
 ```
 
-This will start:
-- **PostgreSQL**: Database server on port 5432
-- **Redis**: Cache server on port 6379
-- **MongoDB**: NoSQL database on port 27017
-- **Kafka**: Message broker on port 9092
-- **FastAPI Application**: On port 8000
+## Docker Environment
 
-#### Database Configuration
+The template includes a complete Docker Compose setup with:
 
-- **Local Development**: Uses SQLite (`thuriyam.db`)
-- **Docker Environment**: Uses PostgreSQL with the following configuration:
-  - Database: `thuriyam_base`
-  - User: `thuriyam_user`
-  - Password: `thuriyam_password`
-  - Host: `postgres` (Docker service name)
-  - Port: `5432`
+- **Your FastAPI service** (port 8000)
+- **PostgreSQL** database (port 5432)
+- **Redis** cache (port 6379) 
+- **MongoDB** NoSQL (port 27017)
+- **Apache Kafka** messaging (port 9092)
+- **StatsD** metrics (port 9125)
 
-#### Environment Variables
-
-The Docker environment uses `build/docker.env` which sets:
-- `FLAVOUR=docker` (uses DockerConfig)
-- `SQLALCHEMY_DATABASE_URL=postgresql://thuriyam_user:thuriyam_password@postgres:5432/thuriyam_base`
-- Service hostnames for Redis, MongoDB, Kafka, etc.
-
-### Production
+### Quick Docker Setup
 
 ```bash
-docker build -f DockerfileProd -t thuriyam-prod .
-docker run -p 8000:8000 thuriyam-prod
+cd my-new-service/build
+./scripts/setup_docker.sh  # Automated setup
+# Or manually:
+docker-compose up -d
 ```
 
-## Testing
+## Database Migrations with Alembic
 
-### Using Postman
+The template includes Alembic for database migrations when the `include_alembic` option is enabled. Alembic is a database migration tool for SQLAlchemy that allows you to manage database schema changes over time.
 
-Import the Postman collection from `test/wi-job-notification-ms.postman_collection.json` and use the environment files:
+### Migration Setup
 
-- `test/local.postman_environment.json` for local development
-- `test/stag.postman_environment.json` for staging
-- `test/prod.postman_environment.json` for production
+1. **Alembic is pre-configured** in the generated project
+2. **Models are automatically detected** - just import them in your modules
+3. **Environment configuration** is handled automatically
 
-### Manual Testing
+### Common Migration Commands
 
+#### Running Migrations
+
+Apply all pending migrations:
 ```bash
-# Test health endpoint
-curl http://localhost:8000/
-
-# Test todos endpoint
-curl http://localhost:8000/api/v1/todos
-
-# Create a todo
-curl -X POST http://localhost:8000/api/v1/todos \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Test Todo", "description": "This is a test todo"}'
+python scripts/manage_db.py migrate
 ```
 
-## Troubleshooting
+#### Creating New Migrations
 
-### Common Issues
-
-1. **"no such table: todos" error**
-   - Make sure you've run the database initialization script
-   - Ensure you're running the script from the app directory: `cd app && python ../scripts/init_db.py`
-   - Check that the database file exists in the app directory and has the correct tables
-
-2. **Port already in use**
-   - Kill any existing processes on port 8000
-   - Use a different port: `--port 8001`
-
-3. **Import errors with motor/pymongo**
-   - Ensure you have the correct versions installed
-   - The requirements file specifies compatible versions
-
-### Database Reset
-
-If you need to reset the database:
-
+Create a new migration based on model changes:
 ```bash
-# Remove the existing database
-rm app/thuriyam.db
-
-# Reinitialize the database
-cd app
-python ../scripts/init_db.py
+python scripts/manage_db.py revision --message "Add new field to users table"
 ```
 
-## Development
+#### Checking Migration Status
+
+View current migration revision:
+```bash
+python scripts/manage_db.py current
+```
+
+View migration history:
+```bash
+python scripts/manage_db.py history
+```
+
+#### Rolling Back Migrations
+
+Rollback one migration:
+```bash
+python scripts/manage_db.py rollback
+```
+
+Rollback to specific revision:
+```bash
+python scripts/manage_db.py rollback --revision abc123
+```
+
+#### Database Operations
+
+Test database connection:
+```bash
+python scripts/manage_db.py test-connection
+```
+
+Reset database (drop all tables and recreate):
+```bash
+python scripts/manage_db.py reset
+```
+
+### Migration Workflow
+
+1. **Make model changes**: Update your SQLAlchemy models in the appropriate module files
+2. **Generate migration**: Run `python scripts/manage_db.py revision --message "Description of changes"`
+3. **Review migration**: Check the generated migration file in `alembic/versions/`
+4. **Apply migration**: Run `python scripts/manage_db.py migrate`
+5. **Test**: Verify your changes work as expected
+
+### Important Migration Notes
+
+- **Always review auto-generated migrations** before applying them
+- **Test migrations in development** before applying to production
+- **Keep migrations small and focused** on specific changes
+- **Never modify existing migration files** that have been applied to production
+- **Use descriptive migration messages** for better tracking
+
+### Migration Troubleshooting
+
+#### Common Issues
+
+1. **Migration conflicts**: If you have conflicts between migrations, you may need to merge them manually
+2. **Model import errors**: Ensure all models are imported in `alembic/env.py`
+3. **Database connection issues**: Check your database configuration in settings
+
+#### Getting Help
+
+- Check [Alembic documentation](https://alembic.sqlalchemy.org/)
+- Review the generated migration files in `alembic/versions/`
+- Test migrations in a development environment first
+
+## Template Features
+
+### 📝 **Complete CRUD API**
+Every generated service includes a working example module with:
+- Create, Read, Update, Delete operations
+- Pagination and filtering
+- Input validation and error handling
+- Comprehensive API documentation
+
+### 🗄️ **Database Management**
+- Automatic table creation
+- Migration management with Alembic
+- Connection pooling and error handling
+- Support for both PostgreSQL and SQLite
+
+### 🔐 **Security & Authentication**
+- JWT token support
+- API key authentication
+- CORS configuration
+- Input validation and sanitization
+
+### 🧪 **Testing & Development**
+- Hot reload in development
+- Database testing utilities
+- Health check endpoints
+- Comprehensive logging
+
+## Customization
 
 ### Adding New Modules
 
-1. Create a new directory in `app/` for your module
-2. Follow the pattern of the `todos/` module
-3. Include `model.py`, `repository.py`, `schema.py`, `validator.py`, and `views.py`
-4. Register your router in `app/app.py`
+The template follows a clear pattern for adding new modules:
 
-### Code Style
+1. Create module directory with standard files:
+   - `model.py` - Database model
+   - `schema.py` - Pydantic schemas
+   - `repository.py` - Data access layer
+   - `validator.py` - Input validation
+   - `views.py` - API endpoints
+   - `__init__.py` - Module registration
 
-The project uses:
-- `flake8` for linting
-- `pre-commit` for git hooks
-- Type hints throughout the codebase
+2. Register the module in `app.py`
+3. Add routes to the FastAPI app
 
-## Deployment
+### Environment Configuration
 
-### Using Makefile
+Three pre-configured environments:
+- **Development** (`FLAVOUR=dev`) - Debug enabled, local SQLite
+- **Production** (`FLAVOUR=prod`) - Optimized, docs disabled
+- **Docker** (`FLAVOUR=docker`) - PostgreSQL, all services
 
-```bash
-# Build and run locally
-make runserver
+### Extending the Template
 
-# Build Docker image
-make build
+To modify this template for your organization:
 
-# Deploy to staging
-make deploy-stag
+1. Fork/clone this repository
+2. Edit the template files (`.jinja` files)
+3. Update `copier.yml` for new variables
+4. Test with `copier copy`
 
-# Deploy to production
-make deploy-prod
-```
+## Support & Documentation
 
-### Kubernetes Deployment
-
-The project includes Kubernetes manifests for deployment:
-
-- `JenkinsfileStag` for staging deployment
-- `JenkinsfileProd` for production deployment
+- **Generated project documentation**: See `README.md` in generated projects
+- **API documentation**: Available at `/docs` when running the service
+- **Docker setup**: See `build/README.md` in generated projects
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+This template embodies Thuriyam's microservice best practices. When contributing:
+
+1. Follow the established patterns
+2. Update documentation
+3. Test template generation
+4. Ensure Docker compatibility
 
 ## License
 
-This project is proprietary and confidential.
-
-## Authors
-
-This template was created by the Thuriyam team.
+Created and maintained by Thuriyam for internal microservice development. 

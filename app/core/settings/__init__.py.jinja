@@ -1,0 +1,20 @@
+from typing import Type, Dict
+from .base import BaseConfig
+from decouple import config
+
+_configs: Dict[str, Type[BaseConfig]] = {}
+_current_config: BaseConfig = None
+
+def register(name: str, config_class: Type[BaseConfig]):
+    """Register a configuration class"""
+    _configs[name] = config_class
+
+def get_config() -> BaseConfig:
+    """Get the current configuration instance"""
+    global _current_config
+    if _current_config is None:
+        flavour = config("FLAVOUR", default="dev")
+        if flavour not in _configs:
+            raise ValueError(f"Unknown configuration flavour: {flavour}")
+        _current_config = _configs[flavour]()
+    return _current_config 

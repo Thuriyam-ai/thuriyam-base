@@ -1,0 +1,102 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{ project_name }}"
+version = "{{ version }}"
+description = "{{ service_description }}"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [
+    {name = "{{ author_name }}", email = "{{ author_email }}"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+]
+
+dependencies = [
+    # Web Framework
+    "fastapi==0.115.6",
+    "uvicorn[standard]==0.34.0",
+    
+    # Database
+    "sqlalchemy==2.0.28",
+    "pydantic==2.11.7",
+    "pydantic-settings==2.2.1",
+    {% if use_postgres -%}
+    "psycopg2-binary==2.9.9",
+    {% else -%}
+    # SQLite is included with Python
+    {% endif -%}
+    
+    # AWS & Cloud Services
+    "boto3==1.34.106",
+    "pyathena==3.0.10",
+    
+    # Async & Performance
+    "uvloop==0.21.0",
+    "httptools==0.6.4",
+    "nest-asyncio==1.6.0",
+    
+    # Data Processing
+    "pymongo==4.6.1",
+    "motor==3.3.2",
+    
+    # Redis
+    "redis[hiredis]==5.0.1",
+    
+    # HTTP & API
+    "requests==2.29.0",
+    
+    # CLI
+    "typer==0.15.1",
+    
+    # Monitoring & Observability
+    "elastic-apm==6.18.0",
+    "datadog==0.50.2",
+    
+    # Utilities
+    "pytz==2024.1",
+    "python-decouple==3.8",
+    "base58==2.1.1",
+    
+    # Security & Authentication
+    "passlib[bcrypt]==1.7.4",
+    "python-jose[cryptography]==3.3.0",
+    "python-multipart==0.0.6",
+    "email-validator==2.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit==2.9.2",
+    "flake8-async==24.11.4",
+    {% if include_alembic -%}
+    "alembic==1.14.0",
+    {% endif -%}
+]
+
+# For environments that need the same as base
+production = []
+staging = []
+
+[tool.black]
+line-length = 79
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+''' 

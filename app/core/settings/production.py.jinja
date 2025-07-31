@@ -1,0 +1,9 @@
+from .base import BaseConfig
+
+
+class ProdConfig(BaseConfig):
+    """Production environment configuration"""
+    
+    DEBUG: bool = False
+    DOCS_URL: str = None  # Disable docs in production
+    REDOC_URL: str = None  # Disable redoc in production 

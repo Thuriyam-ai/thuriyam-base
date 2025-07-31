@@ -1,0 +1,8 @@
+from typing import List, Optional
+from sqlalchemy.orm import Session
+from core.base.repository import BaseRepository
+from {{ entity }}.model import {{ entity.title() }}
+
+class {{ entity.title() }}Repository(BaseRepository[{{ entity.title() }}]):
+    def __init__(self, db: Session):
+        super().__init__(db, {{ entity.title() }})

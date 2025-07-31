@@ -1,8 +1,0 @@
-aws s3 sync __BUCKET_PATH__ .
-chmod u+x init.sh
-aws ecr get-login --region __REGION_NAME__ | sudo sh
-sudo docker plugin install grafana/loki-docker-driver:latest --alias loki --grant-all-permissions
-sudo systemctl restart docker
-sudo docker-compose pull
-sudo docker-compose up -d
-sudo docker system prune -f

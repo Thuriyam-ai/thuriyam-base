@@ -1,0 +1,24 @@
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
+
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONIOENCODING UTF-8
+ENV LANGUAGE en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LC_TYPE en_US.UTF-8
+
+RUN pip3 install --upgrade pip==24.0
+RUN pip3 install uv
+
+ADD pyproject.toml /config/pyproject.toml
+WORKDIR /config
+RUN uv pip install -e ".[production]" --system
+
+RUN mkdir -p /src;
+WORKDIR /src
+COPY . /src
+
+# Production optimizations
+ENV FLAVOUR=prod
+ENV WORKERS_PER_CORE=1
+ENV MAX_WORKERS=8 

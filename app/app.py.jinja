@@ -1,0 +1,72 @@
+import logging
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from core import settings
+from core.settings.development import DevConfig
+from core.settings.production import ProdConfig
+from core.settings.docker import DockerConfig
+from applifespan import app_lifespan
+
+logger = logging.getLogger(__name__)
+
+# Register configurations
+settings.register("dev", DevConfig)
+settings.register("prod", ProdConfig)
+settings.register("docker", DockerConfig)
+
+config = settings.get_config()
+
+# Import modules to register validators
+{% for entity in entities -%}
+import {{ entity }}
+{% endfor %}
+
+app = FastAPI(
+    title=config.APP_NAME,
+    description=config.APP_DESCRIPTION,
+    version=config.VERSION,
+    docs_url=config.DOCS_URL,
+    redoc_url=config.REDOC_URL,
+    openapi_url="/openapi.json",
+    lifespan=app_lifespan,
+)
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=config.ALLOWED_HOSTS_REGEX,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Include all module routers
+{% for entity in entities -%}
+from {{ entity }}.views import router as {{ entity }}_router
+{% endfor %}
+
+{% for entity in entities -%}
+app.include_router({{ entity }}_router, prefix=config.API_PREFIX)
+{% endfor %}
+
+# Add a simple root health check
+@app.get("/")
+async def root():
+    return {"message": "{{ project_name }} is running!", "status": "healthy"}
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint.
+    
+    Returns the service status to verify the API is running.
+    """
+    from core.database import test_database_connection
+    
+    db_status = "healthy" if test_database_connection() else "unhealthy"
+    
+    return {
+        "message": "Thuriyam Base Template Service is running", 
+        "status": "healthy",
+        "database": db_status
+    }

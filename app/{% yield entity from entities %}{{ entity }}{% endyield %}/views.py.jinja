@@ -1,0 +1,117 @@
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException, Query, Security
+from core.security import get_current_user, User
+from {{ entity }}.service import {{ entity.title() }}Service
+from {{ entity }}.schema import {{ entity.title() }}Create, {{ entity.title() }}Update, {{ entity.title() }}Response
+from {{ entity }}.model import {{ entity.title() }}
+
+router = APIRouter(prefix="/{{ entity }}s", tags=["{{ entity.title() }}s"])
+
+@router.post("/", response_model={{ entity.title() }}Response, summary="Create a new {{ entity.title() }}", description="Create a new {{ entity.title() }} item with the provided data")
+async def create{{ entity.title() }}(
+    {{ entity }}_data: {{ entity.title() }}Create,
+    {{ entity }}_service: {{ entity.title() }}Service = Depends({{ entity.title() }}Service),
+    current_user: User = Security(get_current_user, scopes=["admin"]), # TODO: Add appropriate scopes for the operation
+):
+    """
+    Create a new {{ entity.title() }} item.
+    
+    - **{{ entity.title() }}data**: The data for the new {{ entity.title() }} item
+    
+    Returns the created {{ entity.title() }} item with generated ID and timestamps.
+    """
+    return {{ entity }}_service.create{{ entity.title() }}({{ entity }}_data)
+
+@router.get("/", response_model=List[{{ entity.title() }}Response], summary="Get all {{ entity }}", description="Retrieve all {{ entity }} with optional filtering and pagination")
+async def get{{ entity }}(
+    skip: int = Query(0, ge=0, description="Number of records to skip for pagination"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    {{ entity }}_service: {{ entity.title() }}Service = Depends({{ entity.title() }}Service),
+    current_user: User = Security(get_current_user, scopes=["admin"]), # TODO: Add appropriate scopes for the operation
+):
+    """
+    Get all {{ entity }} with optional filtering and pagination.
+    
+    - **skip**: Number of records to skip (for pagination)
+    - **limit**: Maximum number of records to return (1-1000)
+    
+    Returns a list of {{ entity.title() }} items matching the criteria.
+    """
+    return {{ entity }}_service.list(skip, limit)
+
+@router.get("/{{ '{' }}{{ entity.title() }}id{{ '}' }}", response_model={{ entity.title() }}Response, summary="Get a specific {{ entity.title() }}", description="Retrieve a specific {{ entity.title() }} by its ID")
+async def get{{ entity.title() }}(
+    {{ entity }}_id: str,
+    {{ entity }}_service: {{ entity.title() }}Service = Depends({{ entity.title() }}Service),
+    current_user: User = Security(get_current_user, scopes=["admin"]), # TODO: Add appropriate scopes for the operation
+):
+    """
+    Get a specific {{ entity.title() }} by ID.
+    
+    - **{{ entity.title() }}id**: The unique identifier of the {{ entity.title() }}
+    
+    Returns the {{ entity.title() }} item if found, otherwise returns 404.
+    """
+    {{ entity }} = {{ entity }}_service.get({{ entity }}_id)
+    if not {{ entity.title() }}:
+        raise HTTPException(status_code=404, detail="{{ entity.title() }} not found")
+    return {{ entity.title() }}
+
+@router.put("/{{ '{' }}{{ entity.title() }}id{{ '}' }}", response_model={{ entity.title() }}Response, summary="Update a {{ entity.title() }}", description="Update an existing {{ entity.title() }} with new data")
+async def update{{ entity.title() }}(
+    {{ entity }}_id: str,
+    {{ entity }}_data: {{ entity.title() }}Update,
+    {{ entity }}_service: {{ entity.title() }}Service = Depends({{ entity.title() }}Service),
+    current_user: User = Security(get_current_user, scopes=["admin"]), # TODO: Add appropriate scopes for the operation
+):
+    """
+    Update an existing {{ entity.title() }}.
+    
+    - **{{ entity.title() }}id**: The unique identifier of the {{ entity.title() }} to update
+    - **{{ entity.title() }}data**: The updated {{ entity.title() }} data (all fields are optional for partial updates)
+    
+    Returns the updated {{ entity.title() }} item if found, otherwise returns 404.
+    """
+    # Filter out None values for partial update
+    update_data = {k: v for k, v in {{ entity }}_data.model_dump().items() if v is not None}
+    
+    if not update_data:
+        raise HTTPException(status_code=400, detail="No valid fields to update")
+    
+    {{ entity }} = {{ entity }}_service.update({{ entity }}_id, update_data)
+    if not {{ entity }}:
+        raise HTTPException(status_code=404, detail="{{ entity.title() }} not found")
+    return {{ entity }}
+
+@router.patch("/{{ '{' }}{{ entity.title() }}id{{ '}' }}/", response_model={{ entity.title() }}Response, summary="Patch {{ entity.title() }}", description="Patch the data of a {{ entity.title() }}")
+async def patch{{ entity.title() }}(
+    {{ entity }}_id: str,
+    {{ entity }}_service: {{ entity.title() }}Service = Depends({{ entity.title() }}Service),
+    current_user: User = Security(get_current_user, scopes=["admin"]), # TODO: Add appropriate scopes for the operation
+):
+    """
+    Patch the data of a {{ entity.title() }}.
+    
+    - **{{ entity.title() }}id**: The unique identifier of the {{ entity.title() }} to toggle
+    
+    Returns the updated {{ entity.title() }} item if found, otherwise returns 404.
+    """
+    raise NotImplementedError("Patch operation is not implemented")
+
+@router.delete("/{{ '{' }}{{ entity.title() }}id{{ '}' }}", summary="Delete a {{ entity.title() }}", description="Delete a {{ entity.title() }} by its ID")
+async def delete{{ entity.title() }}(
+    {{ entity }}_id: str,
+    {{ entity }}_service: {{ entity.title() }}Service = Depends({{ entity.title() }}Service),
+    current_user: User = Security(get_current_user, scopes=["admin"]), # TODO: Add appropriate scopes for the operation
+):
+    """
+    Delete a {{ entity.title() }} by ID.
+    
+    - **{{ entity.title() }}id**: The unique identifier of the {{ entity.title() }} to delete
+    
+    Returns a success message if the {{ entity.title() }} was deleted, otherwise returns 404.
+    """
+    success = {{ entity }}_service.delete({{ entity }}_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="{{ entity.title() }} not found")
+    return {"message": "{{ entity.title() }} deleted successfully"}

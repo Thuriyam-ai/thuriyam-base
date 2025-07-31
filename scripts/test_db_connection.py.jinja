@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""
+Database connection test script for {{ project_name.title() }}
+"""
+
+import sys
+import os
+from pathlib import Path
+
+# Add the app directory to the Python path
+app_dir = Path(__file__).parent.parent / "app"
+sys.path.insert(0, str(app_dir))
+
+from sqlalchemy import create_engine, text
+from core import settings
+from core.settings.development import DevConfig
+from core.settings.production import ProdConfig
+from core.settings.docker import DockerConfig
+
+def test_connection():
+    """Test database connection for all environments"""
+    
+    # Register configurations
+    settings.register("dev", DevConfig)
+    settings.register("prod", ProdConfig)
+    settings.register("docker", DockerConfig)
+    
+    # Test current environment
+    current_config = settings.get_config()
+    current_flavour = os.environ.get("FLAVOUR", "dev")
+    
+    print(f"🔍 Testing database connection for {{ project_name.title() }}")
+    print(f"Current environment: {current_flavour}")
+    print(f"Database URL: {current_config.SQLALCHEMY_DATABASE_URL}")
+    print()
+    
+    try:
+        # Create engine and test connection
+        engine = create_engine(current_config.SQLALCHEMY_DATABASE_URL)
+        
+        with engine.connect() as connection:
+            # Execute a simple query
+            result = connection.execute(text("SELECT 1 as test"))
+            row = result.fetchone()
+            
+            if row and row.test == 1:
+                print("✅ Database connection successful!")
+                print(f"   Connected to: {current_config.SQLALCHEMY_DATABASE_URL}")
+                
+                # Try to get database info
+                try:
+                    {% if use_postgres -%}
+                    if current_config.SQLALCHEMY_DATABASE_URL.startswith("postgresql"):
+                        version_result = connection.execute(text("SELECT version()"))
+                        version = version_result.fetchone()[0]
+                        print(f"   Database version: {version.split(',')[0]}")
+                    {% endif -%}
+                    {% if not use_postgres -%}
+                    if current_config.SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+                        version_result = connection.execute(text("SELECT sqlite_version()"))
+                        version = version_result.fetchone()[0]
+                        print(f"   SQLite version: {version}")
+                    {% endif -%}
+                except Exception as e:
+                    print(f"   Could not get database version: {e}")
+                
+                return True
+            else:
+                print("❌ Database connection failed - unexpected result")
+                return False
+                
+    except Exception as e:
+        print(f"❌ Database connection failed: {str(e)}")
+        print(f"   Database URL: {current_config.SQLALCHEMY_DATABASE_URL}")
+        return False
+
+def test_all_environments():
+    """Test connections for all configured environments"""
+    
+    environments = [
+        ("dev", DevConfig),
+        ("prod", ProdConfig), 
+        ("docker", DockerConfig)
+    ]
+    
+    print(f"🔍 Testing all database connections for {{ project_name.title() }}")
+    print("=" * 60)
+    
+    results = {}
+    
+    for env_name, config_class in environments:
+        print(f"\n📋 Testing {env_name} environment:")
+        
+        try:
+            config = config_class()
+            print(f"   Database URL: {config.SQLALCHEMY_DATABASE_URL}")
+            
+            engine = create_engine(config.SQLALCHEMY_DATABASE_URL)
+            
+            with engine.connect() as connection:
+                result = connection.execute(text("SELECT 1 as test"))
+                row = result.fetchone()
+                
+                if row and row.test == 1:
+                    print(f"   ✅ {env_name} connection successful!")
+                    results[env_name] = True
+                else:
+                    print(f"   ❌ {env_name} connection failed - unexpected result")
+                    results[env_name] = False
+                    
+        except Exception as e:
+            print(f"   ❌ {env_name} connection failed: {str(e)}")
+            results[env_name] = False
+    
+    print("\n" + "=" * 60)
+    print("📊 Connection Test Summary:")
+    for env_name, success in results.items():
+        status = "✅ PASS" if success else "❌ FAIL"
+        print(f"   {env_name}: {status}")
+    
+    all_passed = all(results.values())
+    print(f"\n🎯 Overall result: {'✅ ALL PASSED' if all_passed else '❌ SOME FAILED'}")
+    
+    return all_passed
+
+if __name__ == "__main__":
+    import argparse
+    
+    parser = argparse.ArgumentParser(description="Test database connections")
+    parser.add_argument("--all", action="store_true", help="Test all environments")
+    
+    args = parser.parse_args()
+    
+    if args.all:
+        success = test_all_environments()
+    else:
+        success = test_connection()
+    
+    sys.exit(0 if success else 1) 

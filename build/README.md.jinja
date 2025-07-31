@@ -1,0 +1,201 @@
+# Docker Setup for {{ project_name.title() }}
+
+This directory contains the Docker configuration for the {{ project_name.title() }} application.
+
+## Services
+
+The Docker Compose setup includes the following services:
+
+- **{{ python_module_name }}**: Main FastAPI application
+- **postgres**: PostgreSQL database
+- **redis**: Redis cache
+- **mongo**: MongoDB database
+- **kafka**: Apache Kafka message broker
+- **kafka_zookeeper**: Zookeeper for Kafka
+- **statsd**: StatsD metrics collection
+
+## Database Configuration
+
+### Local Development
+{% if use_postgres -%}
+- Uses PostgreSQL database in Docker
+- Database: `{{ database_name }}`
+- User: `{{ database_user }}`
+- Password: `{{ database_password }}`
+{% else -%}
+- Uses SQLite database (`{{ python_module_name }}.db`)
+- No additional setup required
+{% endif -%}
+
+### Docker Environment
+- Uses PostgreSQL database
+- Database: `{{ database_name if use_postgres else python_module_name + '_db' }}`
+- User: `{{ database_user if use_postgres else 'postgres' }}`
+- Password: `{{ database_password if use_postgres else 'postgres' }}`
+- Host: `postgres` (Docker service name)
+- Port: `5432`
+
+## Environment Variables
+
+The Docker environment uses the `docker.env` file which contains:
+
+```env
+{% if use_postgres -%}
+# Database URL for Docker environment (PostgreSQL)
+SQLALCHEMY_DATABASE_URL=postgresql://{{ database_user }}:{{ database_password }}@postgres:5432/{{ database_name }}
+{% else -%}
+# Database URL for Docker environment (SQLite)
+SQLALCHEMY_DATABASE_URL=sqlite:///{{ python_module_name }}.db
+{% endif -%}
+
+# Other services
+REDIS_HOST=redis
+REDIS_PORT=6379
+MONGO_DATABASE_HOST=mongo
+MONGO_DATABASE_PORT=27017
+KAFKA_BOOTSTRAP_SERVER=kafka:9092
+STATSD_HOST=statsd
+STATSD_PORT=9125
+
+# Application settings
+FLAVOUR=docker
+DEBUG=true
+```
+
+## Running the Application
+
+### Local Development
+```bash
+cd ../app
+python main.py runserver
+```
+
+### Docker Environment
+```bash
+cd build
+docker-compose up -d
+```
+
+### Using the Setup Script
+```bash
+cd ../scripts
+./setup_docker.sh
+```
+
+## Database Migration
+
+{% if include_alembic -%}
+When running in Docker for the first time, you may need to run database migrations:
+
+```bash
+# After services are up
+cd ../app
+python -m alembic upgrade head
+```
+
+Or use the management script:
+```bash
+cd ../scripts
+python manage_db.py migrate
+```
+{% else -%}
+When running in Docker for the first time, the application will automatically create tables when it starts.
+{% endif -%}
+
+## Health Checks
+
+- PostgreSQL: `pg_isready -U {{ database_user if use_postgres else 'postgres' }} -d {{ database_name if use_postgres else python_module_name + '_db' }}`
+- Application: `http://localhost:8000/` (health check endpoint)
+
+## Ports
+
+- Application: `8000`
+- PostgreSQL: `5432`
+- Redis: `6379`
+- MongoDB: `27017`
+- Kafka: `9092`
+- StatsD: `9125`
+
+## Volumes
+
+- `postgres_data`: PostgreSQL data persistence
+- `redis_data`: Redis data persistence
+- `kafka_data`: Kafka data persistence
+- `zookeeper_data`: Zookeeper data persistence
+
+## Development Workflow
+
+1. **Start services**:
+   ```bash
+   docker-compose up -d
+   ```
+
+2. **Check service health**:
+   ```bash
+   docker-compose ps
+   docker-compose logs {{ project_name }}
+   ```
+
+3. **Access services**:
+   - API: `http://localhost:8000`
+   - API Docs: `http://localhost:8000/docs`
+   - PostgreSQL: `localhost:5432`
+   - Redis: `localhost:6379`
+
+4. **Stop services**:
+   ```bash
+   docker-compose down
+   ```
+
+5. **Clean up (removes volumes)**:
+   ```bash
+   docker-compose down -v
+   ```
+
+## Debugging
+
+The main application container is configured for debugging:
+- Debugpy runs on port `5678`
+- Volume mounts enable hot reload
+- Set breakpoints in your IDE and attach to the remote debugger
+
+## Monitoring
+
+- **StatsD metrics**: Available on port `9102` via Prometheus exporter
+- **Application logs**: `docker-compose logs -f {{ project_name }}`
+- **Service logs**: `docker-compose logs -f [service-name]`
+
+## Troubleshooting
+
+### PostgreSQL Connection Issues
+```bash
+# Check if PostgreSQL is ready
+docker-compose exec postgres pg_isready -U {{ database_user if use_postgres else 'postgres' }}
+
+# Check database exists
+docker-compose exec postgres psql -U {{ database_user if use_postgres else 'postgres' }} -l
+```
+
+### Application Issues
+```bash
+# Check application logs
+docker-compose logs {{ project_name }}
+
+# Restart application service
+docker-compose restart {{ project_name }}
+
+# Rebuild application image
+docker-compose build {{ project_name }}
+```
+
+### Reset Everything
+```bash
+# Stop and remove all containers and volumes
+docker-compose down -v
+
+# Remove built images
+docker-compose build --no-cache
+
+# Start fresh
+docker-compose up -d
+``` 

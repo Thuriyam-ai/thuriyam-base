@@ -7,5 +7,7 @@
 			"path": "../thuriyam-voice-studio-61"
 		}
 	],
-	"settings": {}
+	"settings": {
+		"makefile.configureOnOpen": false
+	}
 }
