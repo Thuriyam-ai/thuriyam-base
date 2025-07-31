@@ -7,7 +7,7 @@ name = "thuriyam-base"
 version = "0.1.0"
 description = "Thuriyam Base API"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.11,<3.12"
 authors = [
     {name = "Thuriyam", email = "contact@thuriyam.com"}
 ]
