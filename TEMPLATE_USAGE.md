@@ -9,7 +9,7 @@ This is a [Copier](https://github.com/copier-org/copier) template for generating
 
 Install Copier:
 ```bash
-pip install copier
+uv tool install copier
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ pip install copier
 ### Generate a new microservice
 
 ```bash
-copier copy thuriyam-base/ thuriyam-service/
+copier copy --trust thuriyam-base/ thuriyam-service/
 ```
 
 You'll be prompted for various configuration options:
@@ -25,11 +25,11 @@ You'll be prompted for various configuration options:
 - **project_name**: Name of your microservice (e.g., "user-service", "payment-service")
 - **service_description**: Brief description of the service
 - **python_module_name**: Python module name (auto-generated from project name)
+- **entities**: List of entity names as JSON array (e.g., ["user","role","scope"]). Each entity will have its own complete CRUD API with models, repositories, schemas, and views. (default: ["user","role","scope"])
 - **org_name**: Organization name (default: "Thuriyam")
 - **version**: Initial version (default: "0.1.0")
 - **author_name**: Author name
 - **author_email**: Author email
-- **modules**: Comma-separated list of module names (e.g., "users,products,orders"). Each module will have its own complete CRUD API with models, repositories, schemas, and views. (default: "items")
 - **use_postgres**: Use PostgreSQL instead of SQLite (default: true)
 - **database_name**: Database name (when using PostgreSQL)
 - **database_user**: Database user (when using PostgreSQL)
@@ -42,7 +42,7 @@ You'll be prompted for various configuration options:
 ### Example
 
 ```bash
-$ copier copy thuriyam-base/ user-service/
+$ copier copy --trust thuriyam-base/ user-service/
 
 🎤 What is the name of your microservice? (e.g., user-service, payment-service)
    thuriyam-service
@@ -55,6 +55,10 @@ $ copier copy thuriyam-base/ user-service/
 🎤 Python module name (snake_case version of project name)
    user_service
 ❯ user_service
+
+🎤 List of entity names (e.g., ["user","role","scope"])
+   ["user","role","scope"]
+❯ ["user","role","scope"]
 
 🎤 Organization name
    Thuriyam
@@ -109,14 +113,15 @@ $ copier copy thuriyam-base/ user-service/
 ❯ your-jwt-secret-key-here
 
 Microservice user-service created successfully!
+Generated entities: ["user","role","scope"]
 Next steps:
 1. cd user-service
 2. Review and update .env files
-3. Run: python -m venv venv && source venv/bin/activate
-4. Run: pip install -e .
-5. Run database migrations if using PostgreSQL
-6. Start development: python main.py runserver
-Or use Docker: cd build && docker-compose up -d
+3. Run: uv venv && source .venv/bin/activate
+4. Run: uv sync
+5. Add new database migrations: docker compose exec -T user-service alembic revision --autogenerate -m 'Initial Service Migration'
+6. Run database migrations: docker compose exec -T user-service alembic upgrade head
+7. Start development server: cd build && docker compose up -d
 ```
 
 ## Generated Structure
@@ -143,32 +148,27 @@ The template creates a complete FastAPI microservice with:
 
 ### Database Management
 - Alembic migrations (optional)
-- Database initialization scripts
 - Connection testing utilities
-- Management command-line tools
+- Docker-based migration workflow
 
 ### Utility Scripts
 - Docker environment setup
-- Database management and testing
+- Database connection testing
 - JWT token generation for testing
-- Script deployment utilities
 
 ### Project Structure
 ```
 {project_name}/
-├── README.md                          # Project documentation
-├── build/                             # Docker infrastructure (optional)
+├── README.md                         # Project documentation
+├── build/                            # Docker infrastructure (optional)
 │   ├── docker-compose.yml            # Multi-service Docker setup
 │   ├── docker.env                    # Docker environment variables
 │   └── README.md                     # Docker setup documentation
-├── scripts/                           # Utility scripts
-│   ├── setup_docker.sh              # Docker environment setup
-│   ├── manage_db.py                  # Database management CLI
-│   ├── init_docker_db.py             # Docker DB initialization
+├── scripts/                          # Utility scripts
+│   ├── setup_docker.sh               # Docker environment setup
 │   ├── test_db_connection.py         # Connection testing
 │   ├── generate-jwt-30-mins.py       # JWT token generation
-│   └── copy_scripts_to_app.sh        # Script deployment utility
-├── app/                             # Main application code
+├── app/                              # Main application code
 │   ├── main.py                       # CLI entry point
 │   ├── app.py                        # FastAPI application
 │   ├── applifespan.py                # Application lifecycle
@@ -178,13 +178,17 @@ The template creates a complete FastAPI microservice with:
 │   ├── core/                         # Core infrastructure
 │   │   ├── settings/                 # Environment configurations
 │   │   ├── base/                     # Base classes (Model, Repository, etc.)
+│   │   ├── security/                 # Authentication and security
+│   │   │   ├── auth.py               # Authentication logic
+│   │   │   └── jwt.py                # JWT token handling
 │   │   ├── database.py               # Database configuration
 │   │   └── adapter/                  # Adapter classes (stubs)
-│   ├── {example_module}/             # Example module
+│   ├── {entity}/                     # Example module
 │   │   ├── __init__.py               # Module initialization
 │   │   ├── model.py                  # Database model
 │   │   ├── schema.py                 # Pydantic schemas
 │   │   ├── repository.py             # Data access layer
+│   │   ├── service.py                # Business logic layer
 │   │   ├── validator.py              # Input validation
 │   │   └── views.py                  # API endpoints
 │   ├── DockerfileLocal               # Development Docker (optional)
@@ -200,16 +204,16 @@ The template creates a complete FastAPI microservice with:
 ### Local Development (Python)
 ```bash
 cd my-new-service
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-pip install -e .
-python app/main.py runserver
+uv venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+uv sync
+cd build && docker compose up -d
 ```
 
 ### Docker Development
 ```bash
 cd my-new-service/build
-docker-compose up -d
+docker compose up -d
 # Or use the setup script:
 cd ../scripts
 ./setup_docker.sh
@@ -220,14 +224,14 @@ cd ../scripts
 # Test database connections
 python scripts/test_db_connection.py
 
-# Run database migrations (if Alembic enabled)
-python scripts/manage_db.py migrate
-
 # Generate JWT tokens for testing
 python scripts/generate-jwt-30-mins.py
 
-# Initialize Docker database
-python scripts/init_docker_db.py
+# Add new database migrations (if using Docker)
+docker compose exec -T {project_name} alembic revision --autogenerate -m 'Migration description'
+
+# Run database migrations (if using Docker)
+docker compose exec -T {project_name} alembic upgrade head
 ```
 
 ## Updating the Template
@@ -254,13 +258,15 @@ The template uses Jinja2 templating with these key variables:
 
 - `{{ project_name }}` - Project name
 - `{{ python_module_name }}` - Python module name (used for service names, but app code is in `app/` directory)
-- `{{ modules }}` - Comma-separated list of module names
+- `{{ entities }}` - JSON array of entity names that will generate modules
 - `{{ org_name }}` - Organization name
 - `{{ service_description }}` - Service description
 - `{{ version }}` - Project version
 - `{{ use_postgres }}` - Boolean for PostgreSQL vs SQLite
 - `{{ include_docker }}` - Boolean for Docker files
 - `{{ include_alembic }}` - Boolean for Alembic migrations
+- `{{ api_prefix }}` - API prefix path (default: "/api/v1")
+- `{{ jwt_secret_key }}` - JWT secret key for authentication
 - `{{ database_name }}`, `{{ database_user }}`, `{{ database_password }}` - Database configuration
 
 ### Conditional Files
@@ -299,10 +305,9 @@ Some files are only generated based on configuration:
 - Input validation and sanitization
 
 ### 🛠️ **Development Tools**
-- Database migration management
+- Database migration management via Docker
 - Connection testing utilities
 - JWT token generation for testing
-- Script deployment and management
 - Comprehensive project documentation
 
 ## Support
