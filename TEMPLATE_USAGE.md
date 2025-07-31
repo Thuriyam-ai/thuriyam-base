@@ -128,33 +128,36 @@ Next steps:
 
 The template creates a complete FastAPI microservice with:
 
-### Core Features
-- FastAPI application with automatic documentation
-- SQLAlchemy ORM with PostgreSQL/SQLite support
-- Pydantic for data validation
-- Repository pattern for data access
+### 🚀 **Core Application**
+- FastAPI with automatic OpenAPI documentation
+- Environment-based configuration (dev/prod/docker)
+- Comprehensive logging and error handling
+- Health check and monitoring endpoints
+
+### 🗄️ **Database & Persistence**
+- SQLAlchemy ORM with migration support
+- Repository pattern for clean data access
 - Model builder pattern with validation
-- Environment-based configuration
-- Comprehensive logging
-- JWT authentication support
-- CORS middleware
-- Health check endpoints
+- Support for PostgreSQL and SQLite
+- Database connection testing and management
 
-### Docker & Infrastructure
-- Multi-service Docker Compose setup (PostgreSQL, Redis, MongoDB, Kafka)
-- Development and production Docker configurations
+### 🐳 **Infrastructure & Deployment**
+- Multi-service Docker Compose setup
+- Development and production containers
 - Hot reload development environment
-- Infrastructure management scripts
+- Service discovery and networking
 
-### Database Management
-- Alembic migrations (optional)
+### 🔐 **Security & Authentication**
+- JWT token authentication
+- API key support
+- CORS configuration
+- Input validation and sanitization
+
+### 🛠️ **Development Tools**
+- Database migration management via Docker
 - Connection testing utilities
-- Docker-based migration workflow
-
-### Utility Scripts
-- Docker environment setup
-- Database connection testing
 - JWT token generation for testing
+- Comprehensive project documentation
 
 ### Project Structure
 ```
@@ -228,10 +231,10 @@ python scripts/test_db_connection.py
 python scripts/generate-jwt-30-mins.py
 
 # Add new database migrations (if using Docker)
-docker compose exec -T {project_name} alembic revision --autogenerate -m 'Migration description'
+docker compose exec -T my-new-service alembic revision --autogenerate -m 'Migration description'
 
 # Run database migrations (if using Docker)
-docker compose exec -T {project_name} alembic upgrade head
+docker compose exec -T my-new-service alembic upgrade head
 ```
 
 ## Updating the Template
@@ -276,39 +279,6 @@ Some files are only generated based on configuration:
 - **Docker files**: Generated when `include_docker` is true
 - **Alembic configuration**: Generated when `include_alembic` is true
 - **PostgreSQL configuration**: Used when `use_postgres` is true
-
-## Features by Category
-
-### 🚀 **Core Application**
-- FastAPI with automatic OpenAPI documentation
-- Environment-based configuration (dev/prod/docker)
-- Comprehensive logging and error handling
-- Health check and monitoring endpoints
-
-### 🗄️ **Database & Persistence**
-- SQLAlchemy ORM with migration support
-- Repository pattern for clean data access
-- Model builder pattern with validation
-- Support for PostgreSQL and SQLite
-- Database connection testing and management
-
-### 🐳 **Infrastructure & Deployment**
-- Multi-service Docker Compose setup
-- Development and production containers
-- Hot reload development environment
-- Service discovery and networking
-
-### 🔐 **Security & Authentication**
-- JWT token authentication
-- API key support
-- CORS configuration
-- Input validation and sanitization
-
-### 🛠️ **Development Tools**
-- Database migration management via Docker
-- Connection testing utilities
-- JWT token generation for testing
-- Comprehensive project documentation
 
 ## Support
 
