@@ -8,7 +8,7 @@ _envops:
 project_name:
     type: str
     help: What is the name of your microservice? (e.g., user-service, payment-service)
-    placeholder: my-service
+    placeholder: thuriyam-service
 
 service_description:
     type: str
