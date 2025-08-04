@@ -1,0 +1,139 @@
+"""
+Flagsmith client manager for feature flags and remote configuration.
+"""
+import logging
+from typing import Optional, Dict, Any
+from flagsmith import Flagsmith
+
+
+logger = logging.getLogger(__name__)
+
+
+class FlagsmithClientManager:
+    """Manager for Flagsmith client connections"""
+    
+    _instance = None
+    _client: Optional[Flagsmith] = None
+    
+    def __init__(self, api_key: str, environment_key: str = ""):
+        self.api_key = api_key
+        self.environment_key = environment_key
+        
+    @classmethod
+    def get_instance(cls) -> 'FlagsmithClientManager':
+        """Get the singleton instance"""
+        if cls._instance is None:
+            raise RuntimeError("FlagsmithClientManager not initialized. Call init_client first.")
+        return cls._instance
+    
+    @classmethod
+    def init_client(cls, api_key: str, environment_key: str = "") -> 'FlagsmithClientManager':
+        """Initialize the Flagsmith client"""
+        if not api_key:
+            logger.warning("Flagsmith API key not provided. Feature flags will be disabled.")
+            return None
+            
+        cls._instance = cls(api_key, environment_key)
+        
+        try:
+            cls._client = Flagsmith(
+                environment_key=environment_key or api_key,
+                # Add any additional configuration here
+                timeout=10,  # 10 second timeout
+            )
+            logger.info(f"Flagsmith client initialized successfully")
+            return cls._instance
+        except Exception as e:
+            logger.error(f"Failed to initialize Flagsmith client: {e}")
+            return None
+    
+    def get_client(self) -> Optional[Flagsmith]:
+        """Get the Flagsmith client instance"""
+        return self._client
+    
+    def is_feature_enabled(self, feature_name: str, user_id: str = None, default: bool = False) -> bool:
+        """
+        Check if a feature flag is enabled.
+        
+        Args:
+            feature_name: Name of the feature flag
+            user_id: Optional user ID for user-specific flags
+            default: Default value if flag cannot be retrieved
+            
+        Returns:
+            Boolean indicating if feature is enabled
+        """
+        if not self._client:
+            logger.warning(f"Flagsmith client not available. Using default value for feature '{feature_name}': {default}")
+            return default
+            
+        try:
+            if user_id:
+                flags = self._client.get_user_flags(user_id)
+                return flags.is_feature_enabled(feature_name)
+            else:
+                flags = self._client.get_environment_flags()
+                return flags.is_feature_enabled(feature_name)
+        except Exception as e:
+            logger.error(f"Error checking feature flag '{feature_name}': {e}")
+            return default
+    
+    def get_feature_value(self, feature_name: str, user_id: str = None, default: Any = None) -> Any:
+        """
+        Get the value of a remote config/feature flag.
+        
+        Args:
+            feature_name: Name of the feature
+            user_id: Optional user ID for user-specific configs
+            default: Default value if config cannot be retrieved
+            
+        Returns:
+            Feature value or default
+        """
+        if not self._client:
+            logger.warning(f"Flagsmith client not available. Using default value for feature '{feature_name}': {default}")
+            return default
+            
+        try:
+            if user_id:
+                flags = self._client.get_user_flags(user_id)
+                feature = flags.get_feature(feature_name)
+            else:
+                flags = self._client.get_environment_flags()
+                feature = flags.get_feature(feature_name)
+                
+            return feature.get_value() if feature else default
+        except Exception as e:
+            logger.error(f"Error getting feature value '{feature_name}': {e}")
+            return default
+    
+    def get_all_flags(self, user_id: str = None) -> Dict[str, Any]:
+        """
+        Get all feature flags.
+        
+        Args:
+            user_id: Optional user ID for user-specific flags
+            
+        Returns:
+            Dictionary of all flags and their values
+        """
+        if not self._client:
+            logger.warning("Flagsmith client not available. Returning empty flags.")
+            return {}
+            
+        try:
+            if user_id:
+                flags = self._client.get_user_flags(user_id)
+            else:
+                flags = self._client.get_environment_flags()
+                
+            result = {}
+            for flag in flags.all_flags():
+                result[flag.feature.name] = {
+                    'enabled': flag.enabled,
+                    'value': flag.get_value()
+                }
+            return result
+        except Exception as e:
+            logger.error(f"Error getting all flags: {e}")
+            return {} 

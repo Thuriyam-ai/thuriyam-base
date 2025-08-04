@@ -47,6 +47,10 @@ class BaseConfig(BaseSettings, extra="ignore"):
     STATSD_SERVICE_NAME: str = config("STATSD_SERVICE_NAME", default="{{ python_module_name }}")
     STATSD_PREFIX: str = config("STATSD_PREFIX", default="{{ python_module_name }}")
 
+    # Flagsmith Configuration
+    FLAGSMITH_API_KEY: str = config("FLAGSMITH_API_KEY", default="")
+    FLAGSMITH_ENVIRONMENT_KEY: str = config("FLAGSMITH_ENVIRONMENT_KEY", default="")
+
     LOGGING_CONFIG: Dict[str, Any] = {
         "version": 1,
         "disable_existing_loggers": False,

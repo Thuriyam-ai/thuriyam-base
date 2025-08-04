@@ -8,6 +8,7 @@ from core.adapter.asyncio.mongo.mongodbadapter import (
     MongoDBAsyncAdapter,
 )
 from core.adapter.statsd import StatsdClientManager
+from core.adapter.flagsmith import FlagsmithClientManager
 from core.adapter.asyncio.caching.client import RedisClientManager
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,13 @@ async def app_lifespan(app: FastAPI):
         service_name=config.STATSD_SERVICE_NAME,
         prefix=config.STATSD_PREFIX,
     ).init_default_client()
+
+    # Initialize Flagsmith Client
+    logger.debug("Initializing Flagsmith Client")
+    FlagsmithClientManager.init_client(
+        api_key=config.FLAGSMITH_API_KEY,
+        environment_key=config.FLAGSMITH_ENVIRONMENT_KEY,
+    )
 
     yield
 

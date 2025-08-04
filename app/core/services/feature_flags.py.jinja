@@ -1,0 +1,46 @@
+"""
+Feature flags service for easy access to Flagsmith functionality.
+"""
+import logging
+from typing import Any, Dict, Optional
+from core.adapter.flagsmith import FlagsmithClientManager
+
+logger = logging.getLogger(__name__)
+
+
+class FeatureFlagsService:
+    """Service for accessing feature flags"""
+    
+    @staticmethod
+    def is_enabled(feature_name: str, user_id: str = None, default: bool = False) -> bool:
+        """Check if a feature is enabled"""
+        try:
+            manager = FlagsmithClientManager.get_instance()
+            return manager.is_feature_enabled(feature_name, user_id, default)
+        except RuntimeError:
+            logger.warning(f"Flagsmith not initialized. Using default for '{feature_name}': {default}")
+            return default
+    
+    @staticmethod
+    def get_value(feature_name: str, user_id: str = None, default: Any = None) -> Any:
+        """Get feature value"""
+        try:
+            manager = FlagsmithClientManager.get_instance()
+            return manager.get_feature_value(feature_name, user_id, default)
+        except RuntimeError:
+            logger.warning(f"Flagsmith not initialized. Using default for '{feature_name}': {default}")
+            return default
+    
+    @staticmethod
+    def get_all_flags(user_id: str = None) -> Dict[str, Any]:
+        """Get all feature flags"""
+        try:
+            manager = FlagsmithClientManager.get_instance()
+            return manager.get_all_flags(user_id)
+        except RuntimeError:
+            logger.warning("Flagsmith not initialized. Returning empty flags.")
+            return {}
+
+
+# Create a global instance for easy import
+feature_flags = FeatureFlagsService() 

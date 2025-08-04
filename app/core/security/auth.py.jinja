@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer, SecurityScopes
 from sqlalchemy.orm import Session
 from core.security.jwt import decode_token
 from core.settings import get_config
+from core.services.feature_flags import FeatureFlagsService
 
 settings = get_config()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -34,7 +35,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 async def get_current_user(
     security_scopes: SecurityScopes,
-    token: str = Depends(oauth2_scheme)
+    token: str = Depends(oauth2_scheme),
+    feature_flags: FeatureFlagsService = Depends(FeatureFlagsService)
 ) -> User:
     """
     Get the current authenticated user.
@@ -79,5 +81,13 @@ async def get_current_user(
     except Exception:
         print(f"Exception: {Exception}")
         raise
+
+    is_enabled = feature_flags.is_enabled("check_user", username)
+    if not is_enabled:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions",
+            headers={"WWW-Authenticate": authenticate_value},
+        )
     
     return User(username=username, roles=token_scopes) 
