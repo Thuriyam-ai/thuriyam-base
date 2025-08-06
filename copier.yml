@@ -8,7 +8,7 @@ _envops:
 project_name:
     type: str
     help: What is the name of your microservice? (e.g., user-service, payment-service)
-    placeholder: thuriyam-service
+    default: thuriyam-users
 
 service_description:
     type: str
@@ -97,8 +97,8 @@ _tasks:
     - command: "uv venv"
     - command: "source .venv/bin/activate"
     - command: "uv sync"
+    - command: "docker compose -f build/docker-compose.yml up -d"
     - command: "echo 'Next steps:'"
-    - command: "echo '6. Add new database migrations: docker compose exec -T {{ project_name }} alembic revision --autogenerate -m \"Initial Service Migration\"'"
-    - command: "echo '7. Run database migrations: docker compose exec -T {{ project_name }} alembic upgrade head'"
-    - command: "echo '8. Start development server: cd build && docker compose up -d'"
+    - command: "echo '- Add new database migrations: docker compose exec -T {{ project_name }} alembic revision --autogenerate -m \"Initial Service Migration\"'"
+    - command: "echo '- Run database migrations: docker compose exec -T {{ project_name }} alembic upgrade head'"
       when: "{{ include_docker }}"
