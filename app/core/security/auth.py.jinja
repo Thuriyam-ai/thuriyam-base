@@ -82,8 +82,8 @@ async def get_current_user(
         print(f"Exception: {Exception}")
         raise
 
-    is_enabled = feature_flags.is_enabled("check_user", username)
-    if not is_enabled:
+    value = feature_flags.get_value("check_user", username)
+    if value!="off":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",

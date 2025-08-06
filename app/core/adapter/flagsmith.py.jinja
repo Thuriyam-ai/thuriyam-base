@@ -4,6 +4,7 @@ Flagsmith client manager for feature flags and remote configuration.
 import logging
 from typing import Optional, Dict, Any
 from flagsmith import Flagsmith
+from flagsmith.models import Flags
 
 
 logger = logging.getLogger(__name__)
@@ -38,8 +39,6 @@ class FlagsmithClientManager:
         try:
             cls._client = Flagsmith(
                 environment_key=environment_key or api_key,
-                # Add any additional configuration here
-                timeout=10,  # 10 second timeout
             )
             logger.info(f"Flagsmith client initialized successfully")
             return cls._instance
@@ -69,11 +68,13 @@ class FlagsmithClientManager:
             
         try:
             if user_id:
-                flags = self._client.get_user_flags(user_id)
-                return flags.is_feature_enabled(feature_name)
+                # For user-specific flags, use get_identity_flags
+                flags = self._client.get_identity_flags(user_id)
             else:
+                # For environment flags, use get_environment_flags
                 flags = self._client.get_environment_flags()
-                return flags.is_feature_enabled(feature_name)
+                
+            return flags.is_feature_enabled(feature_name)
         except Exception as e:
             logger.error(f"Error checking feature flag '{feature_name}': {e}")
             return default
@@ -96,13 +97,15 @@ class FlagsmithClientManager:
             
         try:
             if user_id:
-                flags = self._client.get_user_flags(user_id)
-                feature = flags.get_feature(feature_name)
+                flags = self._client.get_identity_flags(user_id)
             else:
-                flags = self._client.get_environment_flags()
-                feature = flags.get_feature(feature_name)
+                flags: Flags = self._client.get_environment_flags()
                 
-            return feature.get_value() if feature else default
+            if flags.is_feature_enabled(feature_name):  
+                return flags.get_feature_value(feature_name)
+            else:
+                return default
+        
         except Exception as e:
             logger.error(f"Error getting feature value '{feature_name}': {e}")
             return default
@@ -123,7 +126,7 @@ class FlagsmithClientManager:
             
         try:
             if user_id:
-                flags = self._client.get_user_flags(user_id)
+                flags = self._client.get_identity_flags(user_id)
             else:
                 flags = self._client.get_environment_flags()
                 
