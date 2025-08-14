@@ -7,7 +7,7 @@ class StatsdClientManager:
     """Manager for StatsD client connections"""
     
     def __init__(self, host: str = "localhost", port: int = 8125, 
-                 service_name: str = "{{ python_module_name }}", prefix: str = "{{ python_module_name }}"):
+                 service_name: str = "{{ project_name }}", prefix: str = "{{ project_name }}"):
         self.host = host
         self.port = port
         self.service_name = service_name

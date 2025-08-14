@@ -19,7 +19,7 @@ class RedisClientManager:
         # TODO: Implement actual Redis connection
         # Example: self._client = redis.asyncio.from_url(f"redis://{self.host}:{self.port}/{self.db}")
         print(f"Redis client connected to {self.host}:{self.port}/{self.db}")
-        self._clients.{{ python_module_name }}end(self)
+        self._clients.append(self)
     
     async def disconnect(self):
         """Disconnect from Redis"""

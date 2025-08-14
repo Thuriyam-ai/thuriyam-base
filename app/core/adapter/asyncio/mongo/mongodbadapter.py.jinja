@@ -17,7 +17,7 @@ class MongoDBAsyncAdapter:
         # TODO: Implement actual MongoDB connection
         # Example: self._client = motor.motor_asyncio.AsyncIOMotorClient(self.connection_string)
         print(f"MongoDB adapter connected")
-        self._connections.{{ python_module_name }}end(self)
+        self._connections.append(self)
     
     async def disconnect(self):
         """Disconnect from MongoDB"""

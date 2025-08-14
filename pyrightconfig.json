@@ -1,0 +1,25 @@
+{
+    "include": [
+      "app",
+      "test"
+    ],
+    "exclude": [
+      "**/node_modules",
+      "**/__pycache__",
+      "**/.pytest_cache",
+      "**/.venv",
+      "**/build",
+      "**/dist",
+      "**/htmlcov",
+      "**/thuriyam_base.egg-info"
+    ],
+    "extraPaths": [
+      "./app"
+    ],
+    "pythonVersion": "3.11",
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true,
+    "autoImportCompletions": true,
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": false
+  }

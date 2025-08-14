@@ -66,7 +66,7 @@ async def health_check():
     db_status = "healthy" if test_database_connection() else "unhealthy"
     
     return {
-        "message": "Thuriyam Base Template Service is running", 
+        "message": "{{ project_name }} is running", 
         "status": "healthy",
         "database": db_status
     }

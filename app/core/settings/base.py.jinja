@@ -44,8 +44,8 @@ class BaseConfig(BaseSettings, extra="ignore"):
     # StatsD Configuration (with defaults for local development)
     STATSD_HOST: str = config("STATSD_HOST", default="localhost")
     STATSD_PORT: int = config("STATSD_PORT", default=8125, cast=int)
-    STATSD_SERVICE_NAME: str = config("STATSD_SERVICE_NAME", default="{{ python_module_name }}")
-    STATSD_PREFIX: str = config("STATSD_PREFIX", default="{{ python_module_name }}")
+    STATSD_SERVICE_NAME: str = config("STATSD_SERVICE_NAME", default="{{ project_name }}")
+    STATSD_PREFIX: str = config("STATSD_PREFIX", default="{{ project_name }}")
 
     # Flagsmith Configuration
     FLAGSMITH_API_KEY: str = config("FLAGSMITH_API_KEY", default="DvBgcn7NX6U6G4LeV5mayy")
@@ -74,7 +74,7 @@ class BaseConfig(BaseSettings, extra="ignore"):
                 "level": "INFO",
                 "propagate": False,
             },
-            "{{ python_module_name }}": {
+            "app": {
                 "handlers": ["console"],
                 "level": "INFO",
                 "propagate": False,

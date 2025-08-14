@@ -82,12 +82,12 @@ async def get_current_user(
         print(f"Exception: {Exception}")
         raise
 
-    value = feature_flags.get_value("check_user", username)
+    {# value = feature_flags.get_value("check_user", username)
     if value!="off":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions",
             headers={"WWW-Authenticate": authenticate_value},
-        )
+        ) #}
     
     return User(username=username, roles=token_scopes) 

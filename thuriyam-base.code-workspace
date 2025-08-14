@@ -2,12 +2,16 @@
 	"folders": [
 		{
 			"path": "."
-		},
-		{
-			"path": "../thuriyam-voice-studio-61"
 		}
 	],
 	"settings": {
-		"makefile.configureOnOpen": false
+		"makefile.configureOnOpen": false,
+		"python.analysis.extraPaths": ["./app"],
+		"python.defaultInterpreterPath": "./app",
+		"python.analysis.autoImportCompletions": true,
+		"python.analysis.typeCheckingMode": "basic",
+		"python.analysis.include": ["app/**", "test/**"],
+		"python.analysis.exclude": ["**/node_modules", "**/__pycache__", "**/.pytest_cache", "**/.venv", "**/build", "**/dist", "**/htmlcov", "**/thuriyam_base.egg-info"],
+		"python.testing.pytestEnabled": true,
 	}
 }

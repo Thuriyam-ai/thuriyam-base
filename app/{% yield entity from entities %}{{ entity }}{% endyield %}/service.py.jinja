@@ -8,7 +8,7 @@ from core.base.model import ModelBuilder, Operation
 from core.security.auth import verify_password, get_password_hash
 from core.security.jwt import create_access_token
 from {{ entity }}.model import {{ entity.title() }}
-from {{ entity }}.schema import {{ entity.title() }}Create, {{ entity.title() }}Update
+from {{ entity }}.schema import {{ entity.title() }}Create, {{ entity.title() }}Update, {{ entity.title() }}Response
 from {{ entity }}.repository import {{ entity.title() }}Repository
 
 settings = get_config()
@@ -17,7 +17,7 @@ class {{ entity.title() }}Service:
     def __init__(self, db: Session = Depends(get_db)):
         self.repository = {{ entity.title() }}Repository(db)
 
-    def create{{ entity.title() }}(self, input: {{ entity.title() }}Create) -> {{ entity.title() }}:
+    def create{{ entity.title() }}(self, input: {{ entity.title() }}Create) -> {{ entity.title() }}Response:
         # TODO: Validate user input
 
         # Building a model using the ModelBuilder instead of the existing build function.
@@ -27,16 +27,18 @@ class {{ entity.title() }}Service:
             input.model_dump(exclude_unset=True)
         ).build()
 
-        return self.repository.save({{ entity }})
+        {{ entity }}_model = self.repository.save({{ entity }})
+        return {{ entity.title() }}Response.model_validate({{ entity }}_model)
 
-    def update(self, id: str, input: {{ entity.title() }}Update) -> Optional[{{ entity.title() }}]:
+    def update(self, id: str, input: {{ entity.title() }}Update) -> Optional[{{ entity.title() }}Response]:
         # TODO: Add validation for the input
 
         # Update the {{ entity }} with the input data
-        return self.repository.update(
+        {{ entity }}_model = self.repository.update(
             id, 
             input.model_dump(exclude_unset=True)
         )
+        return {{ entity.title() }}Response.model_validate({{ entity }}_model)
 
     def delete(self, id: str) -> bool:
         # TODO: Add validation for the input
@@ -44,5 +46,12 @@ class {{ entity.title() }}Service:
         # Delete the {{ entity }} with the given id
         return self.repository.delete(id)
 
-    def list(self, skip: int = 0, limit: int = 100) -> list[{{ entity.title() }}]:
-        return self.repository.find_all(skip=skip, limit=limit) 
+    def list(self, skip: int = 0, limit: int = 100) -> list[{{ entity.title() }}Response]:
+        list = self.repository.find_all(skip=skip, limit=limit)
+        return [{{ entity.title() }}Response.model_validate(item) for item in list]
+
+    def get(self, id: str) -> Optional[{{ entity.title() }}Response]:
+        {{ entity }} = self.repository.find(id)
+        if not {{ entity }}:
+            return None
+        return {{ entity.title() }}Response.model_validate({{ entity }})
