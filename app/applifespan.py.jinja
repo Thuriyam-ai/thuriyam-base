@@ -2,14 +2,14 @@ import logging
 import warnings
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from core import settings
+from app.core import settings
 
-from core.adapter.asyncio.mongo.mongodbadapter import (
+from app.core.adapter.asyncio.mongo.mongodbadapter import (
     MongoDBAsyncAdapter,
 )
-from core.adapter.statsd import StatsdClientManager
-from core.adapter.flagsmith import FlagsmithClientManager
-from core.adapter.asyncio.caching.client import RedisClientManager
+from app.core.adapter.statsd import StatsdClientManager
+from app.core.adapter.flagsmith import FlagsmithClientManager
+from app.core.adapter.asyncio.caching.client import RedisClientManager
 
 logger = logging.getLogger(__name__)
 

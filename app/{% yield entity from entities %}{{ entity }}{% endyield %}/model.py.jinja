@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, Boolean
-from core.base.model import BaseModel
+from app.core.base.model import BaseModel
 
 class {{ entity.title() }}(BaseModel):
     __tablename__ = "{{ entity }}s"

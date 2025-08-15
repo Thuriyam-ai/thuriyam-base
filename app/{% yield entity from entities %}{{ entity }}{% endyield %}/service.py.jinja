@@ -2,14 +2,14 @@ from datetime import timedelta
 from typing import Optional
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from core.settings import get_config
-from core.database import get_db
-from core.base.model import ModelBuilder, Operation
-from core.security.auth import verify_password, get_password_hash
-from core.security.jwt import create_access_token
-from {{ entity }}.model import {{ entity.title() }}
-from {{ entity }}.schema import {{ entity.title() }}Create, {{ entity.title() }}Update, {{ entity.title() }}Response
-from {{ entity }}.repository import {{ entity.title() }}Repository
+from app.core.settings import get_config
+from app.core.database import get_db
+from app.core.base.model import ModelBuilder, Operation
+from app.core.security.auth import verify_password, get_password_hash
+from app.core.security.jwt import create_access_token
+from app.{{ entity }}.model import {{ entity.title() }}
+from app.{{ entity }}.schema import {{ entity.title() }}Create, {{ entity.title() }}Update, {{ entity.title() }}Response
+from app.{{ entity }}.repository import {{ entity.title() }}Repository
 
 settings = get_config()
 

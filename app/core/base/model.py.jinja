@@ -1,7 +1,7 @@
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, String, DateTime
 from datetime import datetime, timezone
-from .validator import Operation, BaseValidator
+from app.core.base.validator import Operation, BaseValidator
 from typing import Any, Dict, Type
 import copy
 import uuid

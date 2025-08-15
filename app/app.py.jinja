@@ -1,11 +1,11 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from core import settings
-from core.settings.development import DevConfig
-from core.settings.production import ProdConfig
-from core.settings.docker import DockerConfig
-from applifespan import app_lifespan
+from app.core import settings
+from app.core.settings.development import DevConfig
+from app.core.settings.production import ProdConfig
+from app.core.settings.docker import DockerConfig
+from app.applifespan import app_lifespan
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ config = settings.get_config()
 
 # Import modules to register validators
 {% for entity in entities -%}
-import {{ entity }}
+import app.{{ entity }}
 {% endfor %}
 
 app = FastAPI(
@@ -42,7 +42,7 @@ app.add_middleware(
 
 # Include all module routers
 {% for entity in entities -%}
-from {{ entity }}.views import router as {{ entity }}_router
+from app.{{ entity }}.views import router as {{ entity }}_router
 {% endfor %}
 
 {% for entity in entities -%}
@@ -61,7 +61,7 @@ async def health_check():
     
     Returns the service status to verify the API is running.
     """
-    from core.database import test_database_connection
+    from app.core.database import test_database_connection
     
     db_status = "healthy" if test_database_connection() else "unhealthy"
     

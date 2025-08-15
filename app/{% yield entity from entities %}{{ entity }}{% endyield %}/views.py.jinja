@@ -1,9 +1,9 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Query, Security
-from core.security import get_current_user, User
-from {{ entity }}.service import {{ entity.title() }}Service
-from {{ entity }}.schema import {{ entity.title() }}Create, {{ entity.title() }}Update, {{ entity.title() }}Response
-from {{ entity }}.model import {{ entity.title() }}
+from app.core.security import get_current_user, User
+from app.{{ entity }}.service import {{ entity.title() }}Service
+from app.{{ entity }}.schema import {{ entity.title() }}Create, {{ entity.title() }}Update, {{ entity.title() }}Response
+from app.{{ entity }}.model import {{ entity.title() }}
 
 router = APIRouter(prefix="/{{ entity }}s", tags=["{{ entity.title() }}s"])
 

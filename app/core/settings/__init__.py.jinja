@@ -1,5 +1,5 @@
 from typing import Type, Dict
-from .base import BaseConfig
+from app.core.settings.base import BaseConfig
 from decouple import config
 
 _configs: Dict[str, Type[BaseConfig]] = {}

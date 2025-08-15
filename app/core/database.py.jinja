@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.orm import sessionmaker
-from core import settings
+from app.core import settings
 
-from core.base.model import Base
+from app.core.base.model import Base
 import logging
 
 config = settings.get_config()

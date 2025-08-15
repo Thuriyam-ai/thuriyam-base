@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session
 import time
 import base58
 import random
-from core.base.validator import Operation, BaseValidator
+from app.core.base.validator import Operation, BaseValidator
+from app.core.base.model import BaseModel
 
-T = TypeVar('T')
+T = TypeVar('T', bound=BaseModel)
 
 class BaseRepository(Generic[T]):
     def __init__(self, db: Session, model: Type[T]):
