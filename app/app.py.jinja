@@ -16,11 +16,6 @@ settings.register("docker", DockerConfig)
 
 config = settings.get_config()
 
-# Import modules to register validators
-{% for entity in entities -%}
-import app.{{ entity }}
-{% endfor %}
-
 app = FastAPI(
     title=config.APP_NAME,
     description=config.APP_DESCRIPTION,

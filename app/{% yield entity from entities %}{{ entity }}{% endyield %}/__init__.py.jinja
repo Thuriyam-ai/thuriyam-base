@@ -1,8 +1,19 @@
 # Module initialization
 from app.core.base.validator import BaseValidator, Operation
-from app.{{ entity }}.model import {{ entity.title() }}
-from app.{{ entity }}.validator import {{ entity.title() }}CreateValidator
 
-# Register validators
-validator_instance = BaseValidator.get_instance()
-validator_instance.register({{ entity.title() }}, Operation.CREATE, {{ entity.title() }}CreateValidator)
+def _register_validators():
+    """Lazy registration of validators to avoid circular imports"""
+    from app.{{ entity }}.model import {{ entity.title() }}
+    from app.{{ entity }}.validator import {{ entity.title() }}CreateValidator
+    
+    validator_instance = BaseValidator.get_instance()
+    validator_instance.register({{ entity.title() }}, Operation.CREATE, {{ entity.title() }}CreateValidator)
+
+# Register validators when the module is first accessed
+_validator_registered = False
+
+def ensure_validators_registered():
+    global _validator_registered
+    if not _validator_registered:
+        _register_validators()
+        _validator_registered = True

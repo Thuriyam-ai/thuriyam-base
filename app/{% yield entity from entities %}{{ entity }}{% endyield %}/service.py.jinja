@@ -10,11 +10,13 @@ from app.core.security.jwt import create_access_token
 from app.{{ entity }}.model import {{ entity.title() }}
 from app.{{ entity }}.schema import {{ entity.title() }}Create, {{ entity.title() }}Update, {{ entity.title() }}Response
 from app.{{ entity }}.repository import {{ entity.title() }}Repository
+from app.{{ entity }} import ensure_validators_registered
 
 settings = get_config()
 
 class {{ entity.title() }}Service:
     def __init__(self, db: Session = Depends(get_db)):
+        ensure_validators_registered()
         self.repository = {{ entity.title() }}Repository(db)
 
     def create{{ entity.title() }}(self, input: {{ entity.title() }}Create) -> {{ entity.title() }}Response:
@@ -38,6 +40,9 @@ class {{ entity.title() }}Service:
             id, 
             input.model_dump(exclude_unset=True)
         )
+        if not {{ entity }}_model:
+            raise HTTPException(status_code=404, detail="{{ entity.title() }} not found")
+            
         return {{ entity.title() }}Response.model_validate({{ entity }}_model)
 
     def delete(self, id: str) -> bool:

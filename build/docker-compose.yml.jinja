@@ -85,6 +85,7 @@ services:
       POSTGRES_USER: {{ database_user if use_postgres else 'postgres' }}
       POSTGRES_PASSWORD: {{ database_password if use_postgres else 'postgres' }}
       POSTGRES_DB: {{ database_name if use_postgres else python_module_name + '_db' }}
+    command: ["postgres", "-c", "wal_level=logical"]
     ports:
       - "5432:5432"
     volumes:
